@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <fstream>  
 #include <thread>
 
 #include "JHNetwork.h"
@@ -16,9 +17,25 @@ float fSCMThreshold = 0;
 float fCGTCThreshold = 0;
 float fHCBCThreshold = 0;
 
-void createConnect(int port, int vehicleType, const char* host)
-{
+#define ALL
 
+string readConfig(string strPath)
+{
+    ifstream fin;
+    fin.open(strPath, ios::in);
+    if (!fin.is_open())
+    {
+        cout << "无法找到这个文件！" << endl;
+        return nullptr;
+    }
+    string buff;
+    while (getline(fin, buff))
+    {
+        cout << buff << endl;
+    }
+    fin.close();
+
+    return buff;
 }
 
 int main()
@@ -28,8 +45,11 @@ int main()
     //const char* sendHost = "127.0.0.1";
     //const char* recvHost = "127.0.0.1";
     //const char* sendHost = "192.168.110.229";
-    const char* sendHost = "192.168.0.255";
-    const char* recvHost = "192.168.0.207";
+    //const char* sendHost = "192.168.0.255";
+    const char* sendHost = "10.88.2.50";
+    //const char* recvHost = "192.168.0.207";
+    string str = readConfig("config.txt");
+    const char* recvHost = str.c_str();
 
     // 接收客户端操作
     SocketUDP* recvFromUE = np.connectUDP(recvHost, 9001);
@@ -44,6 +64,7 @@ int main()
 
     std::thread threadOperateSync(operateSync);
 
+#if defined(CTCTEST) || defined(ALL)
     // 拦焦车发送状态同步给客户端
     SocketUDP* sendCTCToUE = np.connectUDP(sendHost, 8001);
     SocketUDP* sendCTCUIToUE = np.connectUDP(sendHost, 8101);
@@ -58,7 +79,7 @@ int main()
     UA_Client* recvCTCFromPLC = np.connectOPCUA("opc.tcp://192.168.0.7:4840");
     // 拦焦车从PLC接收UI数据
     UA_Client* recvCTCUIFromPLC = np.connectOPCUA("opc.tcp://192.168.0.7:4840");
-    if (recvCTCFromPLC == nullptr || recvCTCFromPLC == nullptr)
+    if (recvCTCFromPLC == nullptr || recvCTCUIFromPLC == nullptr)
     {
         cout << "Error:By PLCUA connect CTC From PLC failed." << endl;
         return 0;
@@ -73,7 +94,9 @@ int main()
     JHUIDataSync ctcUIDataSync(recvCTCUIFromPLC, sendCTCUIToUE, VEHICLETYPE::CTC);
 
     std::thread threadCTCUIDataSync(ctcUIDataSync);
+#endif
 
+#if defined(CPMTEST) || defined(ALL)
     // 推焦车
     SocketUDP* sendCPMToUE = np.connectUDP(sendHost, 8002);
     SocketUDP* sendCPMUIToUE = np.connectUDP(sendHost, 8102);
@@ -99,7 +122,9 @@ int main()
     JHUIDataSync cpmUIDataSync(recvCPMUIFromPLC, sendCPMUIToUE, VEHICLETYPE::CPM);
 
     std::thread threadCPMUIDataSync(cpmUIDataSync);
+#endif
 
+#if defined(SCMTEST) || defined(ALL)
     // 装煤车
     SocketUDP* sendSCMToUE = np.connectUDP(sendHost, 8003);
     SocketUDP* sendSCMUIToUE = np.connectUDP(sendHost, 8103);
@@ -125,7 +150,9 @@ int main()
     JHUIDataSync scmUIDataSync(recvSCMUIFromPLC, sendSCMUIToUE, VEHICLETYPE::SCM);
 
     std::thread threadSCMUIDataSync(scmUIDataSync);
+#endif
 
+#if defined(CGTCTEST) || defined(ALL)
     // 导烟车
     SocketUDP* sendCGTCToUE = np.connectUDP(sendHost, 8004);
     SocketUDP* sendCGTCUIToUE = np.connectUDP(sendHost, 8104);
@@ -151,7 +178,9 @@ int main()
     JHUIDataSync cgtcUIDataSync(recvCGTCUIFromPLC, sendCGTCUIToUE, VEHICLETYPE::CGTC);
 
     std::thread threadCGTCUIDataSync(cgtcUIDataSync);
+#endif
 
+#if defined(HCBCTEST) || defined(ALL)
     // 熄焦车
     SocketUDP* sendHCBCToUE = np.connectUDP(sendHost, 8005);
     SocketUDP* sendHCBCUIToUE = np.connectUDP(sendHost, 8105);
@@ -173,27 +202,38 @@ int main()
     JHStateSync hcbcStateSync(recvHCBCFromPLC, sendHCBCToUE, VEHICLETYPE::HCBC);
 
     std::thread threadHCBCStateSync(hcbcStateSync);
-
+   
     JHUIDataSync hcbcUIDataSync(recvHCBCUIFromPLC, sendHCBCUIToUE, VEHICLETYPE::HCBC);
 
     std::thread threadHCBCUIDataSync(hcbcUIDataSync);
+#endif
 
     threadOperateSync.join();
 
+#if defined(CTCTEST) || defined(ALL)
     threadCTCStateSync.join();
     threadCTCUIDataSync.join();
+#endif
 
+#if defined(CPMTEST) || defined(ALL)
     threadCPMStateSync.join();
     threadCPMUIDataSync.join();
+#endif
 
+#if defined(SCMTEST) || defined(ALL)
     threadSCMStateSync.join();
     threadSCMUIDataSync.join();
+#endif
 
+#if defined(CGTCTEST) || defined(ALL)
     threadCGTCStateSync.join();
     threadCGTCUIDataSync.join();
+#endif
 
+#if defined(HCBCTEST) || defined(ALL)
     threadHCBCStateSync.join();
     threadHCBCUIDataSync.join();
+#endif
 
     return 0;
 }

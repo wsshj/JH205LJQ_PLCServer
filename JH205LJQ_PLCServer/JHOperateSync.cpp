@@ -141,7 +141,7 @@ void JHOperateSync::startOperateSync()
 
 	while (true)
 	{
-		int ret_len = recvfrom(m_recvFromUE->svr, revData, 1024, 0, (SOCKADDR*)&remoteAddr, &nAddrlen);
+		int ret_len = recvfrom(m_recvFromUE->svr, revData, 2048, 0, (SOCKADDR*)&remoteAddr, &nAddrlen);
 
 		if (SOCKET_ERROR == ret_len)
 		{

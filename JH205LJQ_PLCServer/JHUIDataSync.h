@@ -6,7 +6,14 @@
 
 using namespace std;
 
-struct CTCStates
+struct CarInfo
+{
+	int furnaceId;			//炉号
+	UINT8 pattern;			//模式
+	float position;			//当前位置
+};
+
+struct CTCSystemStatus
 {
 	bool CTCMoving;			// 行驶中
 	bool CTCRunOver;		// 行驶结束
@@ -22,7 +29,7 @@ struct CTCStates
 	bool CokePushed;		// 推焦完毕
 };
 
-struct CPMStates
+struct CPMSystemStatus
 {
 	bool CPMMoving;			// 行驶中
 	bool CPMRunOver;		// 行驶结束
@@ -39,7 +46,8 @@ struct CPMStates
 	bool CoalCleaning;		// 清煤中
 	bool CoalCleanOver;		// 清煤完毕
 };
-struct SCMStates
+
+struct SCMSystemStatus
 {
 	bool SCMMoving;				// 行驶中
 	bool SCMRunOver;			// 行驶结束
@@ -51,13 +59,15 @@ struct SCMStates
 	bool CoalTampStatus;		// 捣固状态
 	bool CoalPushStatus;		// 推煤状态
 };
-struct CGTCStates
+
+struct CGTCSystemStatus
 {
 	bool CGTCMoving;			// 行驶中
 	bool SmokeGuiding; 			// 导烟中
 	bool SmokeGuided; 			// 导烟结束
 };
-struct HCBCStates
+
+struct HCBCSystemStatus
 {
 	bool HCBCMoving;			// 行驶中
 	bool HCBCRunOver;			// 行驶结束
@@ -155,8 +165,8 @@ struct CTCCGParameterUI
 	UINT8 coke_grid_stutes_oc;		//导焦栅：锁开 / 锁闭
 	UINT8 coke_grid_stutes_fb;		//导焦栅：前限 / 后限
 	UINT8 flue_damper_status;		//主烟道风门：开限 / 闭限
-	UINT8 fan_damper_status;			//风机风门：开限 / 闭限
-	UINT8 emergency_release;			//紧急放散：开限 / 闭限
+	UINT8 fan_damper_status;		//风机风门：开限 / 闭限
+	UINT8 emergency_release;		//紧急放散：开限 / 闭限
 	bool inverter1_status;			//变频器1：运行 / 停止
 	float inverter1_speed;			//变频器1：速度：28Hz
 	float inverter1_current;		//变频器1：电流：15A
@@ -286,6 +296,9 @@ struct UIDataSyncProtocol
 
 class JHUIDataSync
 {
+private:
+	const int m_nSyncFrequency = 1000;
+
 public:
 	SocketUDP* m_sendToUE;
 	UA_Client* m_recvFromPLC;
@@ -306,75 +319,105 @@ public:
 	//拦焦车，小屏，数据展示
 	NumericalShow packNumericalShow();
 
-	//拦焦车，小屏，放散状态
+	//拦焦车\推焦车，小屏，放散状态
 	DiffuseStatus packDiffuseStatus();
 
-	//焦车，小屏，头尾焦状态
+	//推焦车，小屏，头尾焦状态
 	HeadTailStatus packHeadTailStatus();
 	
+	//导烟车，小屏，导烟管状态
 	SmokeDuctStatus	packSmokeDuctStatus();
 
+	//推焦车，小屏，余煤回收
 	CoalRecovery packCoalRecovery();
 
+	//熄焦车，小屏，熄焦塔状态
 	CokeQuenchingTowerStatus packCokeQuenchingTowerStatus();
 
-	CTCStates packCTCStates();
-	CPMStates packCPMStates();
-	SCMStates packSCMStates();
-	CGTCStates packCGTCStates();
-	HCBCStates packHCBCStates();
+	//打包拦焦车系统状态
+	CTCSystemStatus packCTCSystemStatus();
 
-	//拦焦车，大屏，总场景中车顶标签
+	//打包推焦车系统状态
+	CPMSystemStatus packCPMSystemStatus();
+
+	//打包装煤车系统状态
+	SCMSystemStatus packSCMSystemStatus();
+
+	//打包导烟车系统状态
+	CGTCSystemStatus packCGTCSystemStatus();
+
+	//打包熄焦车系统状态
+	HCBCSystemStatus packHCBCSystemStatus();
+
+	//打包拦焦车，大屏，总场景中车顶标签
 	CTCTopUI packCTCTotalTopUI();
 
+	//打包推焦车，大屏，总场景中车顶标签
 	CTCTopUI packCPMTotalTopUI();
 
+	//打包装煤车，大屏，总场景中车顶标签
 	CTCTopUI packSCMTotalTopUI();
 
+	//打包导烟车，大屏，总场景中车顶标签
 	CTCTopUI packCGTCTotalTopUI();
 
+	//打包熄焦车，大屏，总场景中车顶标签
 	CTCTopUI packHCBCTotalTopUI();
 
+	// 打包拦焦车参数设置
 	CTCTopUI packCTCTopUI();
 
+	// 打包取门装置参数
 	CTCTopUI packCTCGDTTopUI();
 
+	// 打包清门装置参数
 	CTCTopUI packCTCDCTTopUI();
 
+	// 打包清框装置参数
 	CTCTopUI packCTCFCTTopUI();
 
+	// 打包导焦栅/除尘装置参数
 	CTCTopUI packCTCCGTopUI();
 
+	// 打包拦焦车参数设置
 	CTCParameterSetUI packCTCParameterSetUI();
 
+	// 打包取门装置参数
 	CTCGDTParameterUI packCTCGDTParameterUI();
 
+	// 打包导焦栅/除尘装置参数
 	CTCCGParameterUI packCTCCGParameterUI();
 
+	//// 打包清框装置参数
 	//CTCFCTParameterUI packCTCFCTParameterUI();
 
+	//// 打包清门装置参数
 	//CTCDCTParameterUI packCTCDCTParameterUI();
 
+	// 打包变频器参数
 	CTCInverterParametersUI packCTCInverterParametersUI();
 
+	// 打包系统检查
 	CTCSystemCheckUI packCTCSystemCheckUI();
 
+	// 打包设备状态
 	CTCDeviceStatusUI packCTCDeviceStatusUI();
 
+	// 接收bool类型数据
 	void recvData(bool& state, const char* strNodeId);
 
+	// 接收UINT8类型数据
 	void recvData(UINT8& state, const char* strNodeId);
 
+	// 接收int类型数据
 	void recvData(int& state, const char* strNodeId);
 
+	// 接收float类型数据
 	void recvData(float* state, const char* strNodeId);
 
 	void startSync();
 
 	template <typename T>
 	void sendData(T t, int key);
-
-	//void recvData(INT16& state, const char* strNodeId);
-	//void startStateSync(UA_NodeId nodeId);
 };
 

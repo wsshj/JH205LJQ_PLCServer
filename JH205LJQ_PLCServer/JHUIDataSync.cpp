@@ -163,7 +163,7 @@ CoalRecovery JHUIDataSync::packCoalRecovery()
 
 	recvData(cr.scraper1, "\"ScraperRunnning\"");
 	recvData(cr.dust_collecting_hopper, "");
-	recvData(cr.residual_coal_hopper, "\"DB129  SystemStatus\".\"RemainCoalCollectionMoving\"");
+	recvData(cr.residual_coal_hopper, "\"DB101  SystemStatus\".\"RemainCoalCollectionMoving\"");
 
 	return cr;
 }
@@ -183,9 +183,9 @@ CokeQuenchingTowerStatus JHUIDataSync::packCokeQuenchingTowerStatus()
 	return cqts;
 }
 
-CTCStates JHUIDataSync::packCTCStates()
+CTCSystemStatus JHUIDataSync::packCTCSystemStatus()
 {
-	CTCStates states;
+	CTCSystemStatus states;
 
 	recvData(states.CTCMoving, "\"DB101  SystemStatus\".\"CTCMoving\"");
 	recvData(states.CTCRunOver, "\"DB101  SystemStatus\".\"CTCRunOver\"");
@@ -203,9 +203,9 @@ CTCStates JHUIDataSync::packCTCStates()
 	return states;
 }
 
-CPMStates JHUIDataSync::packCPMStates()
+CPMSystemStatus JHUIDataSync::packCPMSystemStatus()
 {
-	CPMStates states;
+	CPMSystemStatus states;
 
 	recvData(states.CPMMoving, "\"DB101  SystemStatus\".\"CPMMoving\"");
 	recvData(states.CPMRunOver, "\"DB101  SystemStatus\".\"CPMRunOver\"");
@@ -225,9 +225,9 @@ CPMStates JHUIDataSync::packCPMStates()
 	return states;
 }
 
-SCMStates JHUIDataSync::packSCMStates()
+SCMSystemStatus JHUIDataSync::packSCMSystemStatus()
 {
-	SCMStates states;
+	SCMSystemStatus states;
 
 	recvData(states.SCMMoving, "\"DB101  SystemStatus\".\"SCMMoving\"");
 	recvData(states.SCMRunOver, "\"DB101  SystemStatus\".\"SCMRunOver\"");
@@ -242,9 +242,9 @@ SCMStates JHUIDataSync::packSCMStates()
 	return states;
 }
 
-CGTCStates JHUIDataSync::packCGTCStates()
+CGTCSystemStatus JHUIDataSync::packCGTCSystemStatus()
 {
-	CGTCStates states;
+	CGTCSystemStatus states;
 
 	recvData(states.CGTCMoving, "\"DB012  SystemStatus\".\"CGTCMoving\"");
 	recvData(states.SmokeGuiding, "\"DB012  SystemStatus\".\"SmokeGuiding\"");
@@ -253,9 +253,9 @@ CGTCStates JHUIDataSync::packCGTCStates()
 	return states;
 }
 
-HCBCStates JHUIDataSync::packHCBCStates()
+HCBCSystemStatus JHUIDataSync::packHCBCSystemStatus()
 {
-	HCBCStates states;
+	HCBCSystemStatus states;
 
 	recvData(states.HCBCMoving, "\"DB101  SystemStatus\".\"HCBC_IsMoving\"");
 	recvData(states.HCBCRunOver, "\"DB101  SystemStatus\".\"HCBC_RunOver\"");
@@ -268,7 +268,7 @@ HCBCStates JHUIDataSync::packHCBCStates()
 	recvData(states.CokeUnloading, "\"DB101  SystemStatus\".\"CokeUnloading\"");
 	recvData(states.CokeUnloadOver, "\"DB101  SystemStatus\".\"CokeUnloadOver\"");
 
-	return HCBCStates();
+	return states;
 }
 
 CTCTopUI JHUIDataSync::packCTCTotalTopUI()
@@ -349,7 +349,7 @@ CTCTopUI JHUIDataSync::packCPMTotalTopUI()
 	bool b = false;
 	ui.states = 0;
 
-	recvData(b, "\"DB101  SystemStatus\".\"CTCMoving\"");
+	recvData(b, "\"DB101  SystemStatus\".\"CPMMoving\"");
 
 	if (b)
 	{
@@ -411,7 +411,7 @@ CTCTopUI JHUIDataSync::packSCMTotalTopUI()
 	bool b = false;
 	ui.states = 0;
 
-	recvData(b, "\"DB117  SystemStatus\".\"SCMMoving\"");
+	recvData(b, "\"DB101  SystemStatus\".\"SCMMoving\"");
 
 	if (b)
 	{
@@ -419,7 +419,7 @@ CTCTopUI JHUIDataSync::packSCMTotalTopUI()
 		return ui;
 	}
 
-	recvData(b, "\"DB119  SystemStatus\".\"CoalPressing\"");
+	recvData(b, "\"DB101  SystemStatus\".\"CoalPressing\"");
 
 	if (b)
 	{
@@ -427,7 +427,7 @@ CTCTopUI JHUIDataSync::packSCMTotalTopUI()
 		return ui;
 	}
 
-	recvData(b, "\"DB118  SystemStatus\".\"CoalLoading\"");
+	recvData(b, "\"DB101  SystemStatus\".\"CoalLoading\"");
 
 	if (b)
 	{
@@ -950,7 +950,7 @@ void JHUIDataSync::recvData(float* state, const char* strNodeId)
 	UA_Variant value; /* Variants can hold scalar values and arrays of any type */
 	UA_Variant_init(&value);
 
-	// 客户端接收"Testt"传来的数据
+	// 客户端接收 strNodeId 传来的数据
 	UA_StatusCode retval = UA_Client_readValueAttribute(m_recvFromPLC, nodeId, &value);
 
 	// 判断接收状态和数据类型是否符合
@@ -975,51 +975,120 @@ void JHUIDataSync::sendData(T t, int key)
 	{
 		cout << "DeviceStatus sendto error !" << endl;
 	}
-	//Sleep(100);
 }
+
+//void JHUIDataSync::startSync()
+//{
+//	while (true)
+//	{
+//		switch (m_vehicleType)
+//		{
+//		case VEHICLETYPE::CTC:
+//			sendData(packCTCTotalTopUI(), 12001);
+//			sendData(packCTCTopUI(), 12002);
+//
+//			switch (m_nCTCStates)
+//			{
+//			case 1:
+//				break;
+//			case 2:
+//				sendData(packCTCGDTTopUI(), 12101);
+//				break;
+//			case 3:
+//				sendData(packCTCDCTTopUI(), 12301);
+//				break;
+//			case 4:
+//				sendData(packCTCCGTopUI(), 12501);
+//				break;
+//			case 5:
+//				sendData(packCTCFCTTopUI(), 12401);
+//				break;
+//			case 6:
+//				sendData(packCTCGDTTopUI(), 12101);
+//				break;
+//			default:
+//				break;
+//			}
+//			
+//			// 大屏参数设置
+//			//sendData(packCTCGDTParameterSetUI(), 12102);
+//			//sendData(packCTCDCTParameterUI(), 12302);
+//			//sendData(packCTCFCTParameterUI(), 12402);
+//			//sendData(packCTCCGTopUI(), 12502);
+//
+//			// 大屏左侧都要展示的数据
+//			//sendData(packCTCSystemCheckUI(), 12003);
+//			//sendData(packCTCDeviceStatusUI(), 12004);
+//			//sendData(packCTCParameterSetUI(), 12005);
+//			//sendData(packCTCInverterParametersUI(), 12006);
+//
+//			// 小屏数据
+//			sendData(packDeviceStatus(), 13002);
+//			sendData(packNumericalShow(), 13001);
+//			sendData(packDiffuseStatus(), 13003);
+//			break;
+//		case VEHICLETYPE::CPM:
+//			sendData(packCPMTotalTopUI(), 22001);
+//
+//			// 小屏数据
+//			sendData(packDeviceStatus(), 23002);
+//			sendData(packNumericalShow(), 23001);
+//			sendData(packDiffuseStatus(), 23003);
+//			sendData(packHeadTailStatus(), 23004);
+//			break;
+//		case VEHICLETYPE::SCM:
+//			sendData(packSCMTotalTopUI(), 32001);
+//
+//			// 小屏数据
+//			sendData(packDeviceStatus(), 33002);
+//			sendData(packNumericalShow(), 33001); 
+//			sendData(packCoalRecovery(), 33003);
+//			break;
+//		case VEHICLETYPE::CGTC:
+//			sendData(packCGTCTotalTopUI(), 42001);
+//
+//			// 小屏数据
+//			sendData(packDeviceStatus(), 43002);
+//			sendData(packNumericalShow(), 43001);
+//			sendData(packSmokeDuctStatus(), 43003);
+//			break;
+//		case VEHICLETYPE::HCBC:
+//			sendData(packHCBCTotalTopUI(), 52001);
+//
+//			// 小屏数据
+//			sendData(packDeviceStatus(), 53002);
+//			sendData(packNumericalShow(), 53001);
+//			sendData(packCokeQuenchingTowerStatus(), 53003);
+//			break;
+//		default:
+//			break;
+//		}
+//		Sleep(1000);
+//	}
+//}
 
 void JHUIDataSync::startSync()
 {
-	while (true)
+	switch (m_vehicleType)
 	{
-		switch (m_vehicleType)
+	case VEHICLETYPE::CTC:
+		while (true)
 		{
-		case VEHICLETYPE::CTC:
 			sendData(packCTCTotalTopUI(), 12001);
 			sendData(packCTCTopUI(), 12002);
+			sendData(packCTCSystemStatus(), 12007);
+			sendData(packCTCGDTTopUI(), 12101);
+			sendData(packCTCDCTTopUI(), 12301);
+			sendData(packCTCFCTTopUI(), 12401);
+			sendData(packCTCCGTopUI(), 12501);
 
-			switch (m_nCTCStates)
-			{
-			case 1:
-				break;
-			case 2:
-				sendData(packCTCGDTTopUI(), 12101);
-				break;
-			case 3:
-				sendData(packCTCDCTTopUI(), 12301);
-				break;
-			case 4:
-				sendData(packCTCCGTopUI(), 12501);
-				break;
-			case 5:
-				sendData(packCTCFCTTopUI(), 12401);
-				break;
-			case 6:
-				sendData(packCTCGDTTopUI(), 12101);
-				break;
-			default:
-				break;
-			}
-			
-			//sendData(packCTCGDTTopUI(), 12102);
-			//
-			//sendData(packCTCGDTTopUI(), 12302);
-			//
-			//sendData(packCTCGDTTopUI(), 12402);
-			//
-			//sendData(packCTCGDTTopUI(), 12502);
+			// 大屏参数设置
+			//sendData(packCTCGDTParameterSetUI(), 12102);
+			//sendData(packCTCDCTParameterUI(), 12302);
+			//sendData(packCTCFCTParameterUI(), 12402);
+			//sendData(packCTCCGTopUI(), 12502);
 
-			// 大屏都要的数据
+			// 大屏左侧都要展示的数据
 			//sendData(packCTCSystemCheckUI(), 12003);
 			//sendData(packCTCDeviceStatusUI(), 12004);
 			//sendData(packCTCParameterSetUI(), 12005);
@@ -1029,38 +1098,71 @@ void JHUIDataSync::startSync()
 			sendData(packDeviceStatus(), 13002);
 			sendData(packNumericalShow(), 13001);
 			sendData(packDiffuseStatus(), 13003);
-			break;
-		case VEHICLETYPE::CPM:
+
+			Sleep(m_nSyncFrequency);
+		}
+		break;
+	case VEHICLETYPE::CPM:
+		while (true)
+		{
 			sendData(packCPMTotalTopUI(), 22001);
+			sendData(packCPMSystemStatus(), 22002);
+
+			// 小屏数据
 			sendData(packDeviceStatus(), 23002);
 			sendData(packNumericalShow(), 23001);
 			sendData(packDiffuseStatus(), 23003);
 			sendData(packHeadTailStatus(), 23004);
-			break;
-		case VEHICLETYPE::SCM:
+
+			Sleep(m_nSyncFrequency);
+		}
+		break;
+	case VEHICLETYPE::SCM:
+		while (true)
+		{
 			sendData(packSCMTotalTopUI(), 32001);
+			sendData(packSCMSystemStatus(), 32002);
+
+			// 小屏数据
 			sendData(packDeviceStatus(), 33002);
-			sendData(packNumericalShow(), 33001); 
+			sendData(packNumericalShow(), 33001);
 			sendData(packCoalRecovery(), 33003);
-			break;
-		case VEHICLETYPE::CGTC:
+
+			Sleep(m_nSyncFrequency);
+		}
+		break;
+	case VEHICLETYPE::CGTC:
+		while (true)
+		{
 			sendData(packCGTCTotalTopUI(), 42001);
+			sendData(packCGTCSystemStatus(), 42002);
+
+			// 小屏数据
 			sendData(packDeviceStatus(), 43002);
 			sendData(packNumericalShow(), 43001);
 			sendData(packSmokeDuctStatus(), 43003);
-			break;
-		case VEHICLETYPE::HCBC:
+
+			Sleep(m_nSyncFrequency);
+		}
+		break;
+	case VEHICLETYPE::HCBC:
+		while (true)
+		{
 			sendData(packHCBCTotalTopUI(), 52001);
+			sendData(packHCBCSystemStatus(), 52002);
+
+			// 小屏数据
 			sendData(packDeviceStatus(), 53002);
 			sendData(packNumericalShow(), 53001);
 			sendData(packCokeQuenchingTowerStatus(), 53003);
-			break;
-		default:
-			break;
-		}
-		Sleep(1000);
-	}
-}
 
+			Sleep(m_nSyncFrequency);
+		}
+		break;
+	default:
+		cout << "不存在此车辆类型" << endl;
+		break;
+	}	
+}
 
 

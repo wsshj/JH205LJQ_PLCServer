@@ -42,26 +42,6 @@ JHStateSync::~JHStateSync()
 
 void JHStateSync::operator()()
 {
-	//switch (m_vehicleType)
-	//{
-	//case VEHICLETYPE::CTC:
-	//	startStateSync(UA_NODEID_STRING(3, (char*)"\"VirtualCTC1ToUE\""));
-	//	break;
-	//case VEHICLETYPE::CPM:
-	//	startStateSync(UA_NODEID_STRING(3, (char*)"\"VirtualCPM1ToUE\""));
-	//	break;
-	//case VEHICLETYPE::SCM:
-	//	startStateSync(UA_NODEID_STRING(3, (char*)"\"VirtualSCM1ToUE\""));
-	//	break;
-	//case VEHICLETYPE::CGTC:
-	//	startStateSync(UA_NODEID_STRING(3, (char*)"\"VirtualCGTC1ToUE\""));
-	//	break;
-	//case VEHICLETYPE::HCBC:
-	//	startStateSync(UA_NODEID_STRING(3, (char*)"\"VirtualHCBC1ToUE\""));
-	//	break;
-	//default:
-	//	break;
-	//}
 	startStateSync();
 }
 
@@ -104,7 +84,7 @@ bool JHStateSync::recvBoolData(const char* strNodeId)
 	// 判断接收状态和数据类型是否符合
 	if (retval == UA_STATUSCODE_GOOD && UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_BOOLEAN]))
 	{
-		return (bool)value.data;
+		return *(bool*)value.data;
 	}
 
 	return 0;
@@ -112,31 +92,53 @@ bool JHStateSync::recvBoolData(const char* strNodeId)
 
 void JHStateSync::startStateSync()
 {
-	while (true)
+	// 将数据转成相应的数据结构,然后处理
+	switch (m_vehicleType)
 	{
-		// 将数据转成相应的数据结构,然后处理
-		switch (m_vehicleType)
-		{
-		case VEHICLETYPE::CTC:
-			comparisonData((CTCStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualCTC1ToUE\"")));
-			break;
-		case VEHICLETYPE::CPM:
-			comparisonData((CPMStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualCPM1ToUE\"")));
-			break;
-		case VEHICLETYPE::SCM:
-			comparisonData((SCMStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualSCM1ToUE\"")));
-			break;
-		case VEHICLETYPE::CGTC:
-			comparisonData((CGTCStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualCGTC1ToUE\"")));
-			break;
-		case VEHICLETYPE::HCBC:
-			comparisonData((HCBCStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualHCBC1ToUE\"")));
-			break;
-		default:
-			break;
-		}
-		//Sleep(0);
+	case VEHICLETYPE::CTC:
+		while (true){ comparisonData((CTCStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualCTC1ToUE\""))); }
+		break;
+	case VEHICLETYPE::CPM:
+		while (true){ comparisonData((CPMStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualCPM1ToUE\""))); }
+		break;
+	case VEHICLETYPE::SCM:
+		while (true){ comparisonData((SCMStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualSCM1ToUE\""))); }
+		break;
+	case VEHICLETYPE::CGTC:
+		while (true){ comparisonData((CGTCStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualCGTC1ToUE\""))); }
+		break;
+	case VEHICLETYPE::HCBC:
+		while (true){ comparisonData((HCBCStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualHCBC1ToUE\""))); }
+		break;
+	default:
+		break;
 	}
+
+	//while (true)
+	//{
+	//	// 将数据转成相应的数据结构,然后处理
+	//	switch (m_vehicleType)
+	//	{
+	//	case VEHICLETYPE::CTC:
+	//		comparisonData((CTCStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualCTC1ToUE\"")));
+	//		break;
+	//	case VEHICLETYPE::CPM:
+	//		comparisonData((CPMStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualCPM1ToUE\"")));
+	//		break;
+	//	case VEHICLETYPE::SCM:
+	//		comparisonData((SCMStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualSCM1ToUE\"")));
+	//		break;
+	//	case VEHICLETYPE::CGTC:
+	//		comparisonData((CGTCStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualCGTC1ToUE\"")));
+	//		break;
+	//	case VEHICLETYPE::HCBC:
+	//		comparisonData((HCBCStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualHCBC1ToUE\"")));
+	//		break;
+	//	default:
+	//		break;
+	//	}
+	//	//Sleep(0);
+	//}
 }
 
 void JHStateSync::sendData(float& lastValue, float newValue, INT32 key, float min, float max)
@@ -198,12 +200,12 @@ void JHStateSync::comparisonData(CTCStateData* pd)
 		return;
 	}
 
-	if (abs(m_ctcLastData->CTC_Location - pd->CTC_Location) > fCTCThreshold)
+	if (abs(m_ctcLastData->CTC_Location - pd->CTC_Location) > fCTCThreshold || abs(m_ctcLastData->CTC_MoveSpeed - pd->CTC_MoveSpeed) > fCTCThreshold)
 	{
 		sendData(m_ctcLastData->CTC_Location, pd->CTC_Location, 10001, 0, 152000);
 		sendData(m_ctcLastData->CTC_MoveSpeed, pd->CTC_MoveSpeed, 10002, 0, 99999);
-		cout << "Location:" << pd->CTC_Location << endl;
-		cout << "CTC_MoveSpeed:" << pd->CTC_MoveSpeed << endl;
+		//cout << "Location:" << pd->CTC_Location << endl;
+		//cout << "CTC_MoveSpeed:" << pd->CTC_MoveSpeed << endl;
 	}
 
 	/*if (abs(m_ctcLastData->CTC_MoveSpeed - pd->CTC_MoveSpeed) > fCTCThreshold)
@@ -290,7 +292,7 @@ void JHStateSync::comparisonData(CPMStateData* pd)
 		cout << "StateData is null" << endl;
 		return;
 	}
-	if (abs(m_cpmLastData->CPM_Location - pd->CPM_Location) > fCPMThreshold)
+	if (abs(m_cpmLastData->CPM_Location - pd->CPM_Location) > fCPMThreshold || abs(m_cpmLastData->CPM_MoveSpeed - pd->CPM_MoveSpeed) > fCPMThreshold)
 	{
 		sendData(m_cpmLastData->CPM_Location, pd->CPM_Location, 20001, 0, 152000);
 		sendData(m_cpmLastData->CPM_MoveSpeed, pd->CPM_MoveSpeed, 20002, 0, 99999);
@@ -369,7 +371,7 @@ void JHStateSync::comparisonData(SCMStateData* pd)
 		cout << "StateData is null" << endl;
 		return;
 	}
-	if (abs(m_scmLastData->SCM_Location - pd->SCM_Location) > fSCMThreshold)
+	if (abs(m_scmLastData->SCM_Location - pd->SCM_Location) > fSCMThreshold || abs(m_scmLastData->SCM_MoveSpeed - pd->SCM_MoveSpeed) > fSCMThreshold)
 	{
 		sendData(m_scmLastData->SCM_Location, pd->SCM_Location, 30001, 0, 180100);
 		sendData(m_scmLastData->SCM_MoveSpeed, pd->SCM_MoveSpeed, 30002, 0, 99999);
@@ -423,7 +425,7 @@ void JHStateSync::comparisonData(CGTCStateData* pd)
 		cout << "StateData is null" << endl;
 		return;
 	}
-	if (abs(m_cgtcLastData->CGTC_Location - pd->CGTC_Location) > fCGTCThreshold)
+	if (abs(m_cgtcLastData->CGTC_Location - pd->CGTC_Location) > fCGTCThreshold || abs(m_cgtcLastData->CGTC_MoveSpeed - pd->CGTC_MoveSpeed) > fCGTCThreshold)
 	{
 		sendData(m_cgtcLastData->CGTC_Location, pd->CGTC_Location, 40001, 0, 107000);
 		sendData(m_cgtcLastData->CGTC_MoveSpeed, pd->CGTC_MoveSpeed, 40002, 0, 99999);
@@ -487,7 +489,7 @@ void JHStateSync::comparisonData(HCBCStateData* pd)
 		cout << "StateData is null" << endl;
 		return;
 	}
-	if (abs(m_hcbcLastData->HCBC_Location - pd->HCBC_Location) > fHCBCThreshold)
+	if (abs(m_hcbcLastData->HCBC_Location - pd->HCBC_Location) > fHCBCThreshold || abs(m_hcbcLastData->HCBC_MoveSpeed - pd->HCBC_MoveSpeed) > fHCBCThreshold)
 	{
 		sendData(m_hcbcLastData->HCBC_Location, pd->HCBC_Location, 50001, 0, 369100);
 		sendData(m_hcbcLastData->HCBC_MoveSpeed, pd->HCBC_MoveSpeed, 50002, 0, 99999);

@@ -40,7 +40,7 @@ public:
 
 	void comparisonData(UINT8 key, const char* str1, const char* str2);
 
-	void comparisonData(UINT8 key, const char* str1, const char* str2, const char* str3);
+	//void comparisonData(UINT8 key, const char* str1, const char* str2, const char* str3);
 
 	void startOperateSync();
 
