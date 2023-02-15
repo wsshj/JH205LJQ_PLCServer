@@ -33,7 +33,7 @@ NumericalShow JHUIDataSync::packNumericalShow()
 		recvData(ns.oil_pressure, "\"DB101  SystemStatus\".\"OilPressure\"");
 		recvData(ns.next_furnaceId, "\"DB200  HMI\".\"Sys-GoalStove\"");
 		recvData(ns.furnaceId, "\"DB200  HMI\".\"Sys-CurrentStove\"");
-		recvData(&ns.speed, "\"VirtualCTC1ToUE\".\"CTC_MoveSpeed\"");
+		recvData(ns.speed, "\"VirtualCTC1ToUE\".\"CTC_MoveSpeed\"");
 		break;
 	case VEHICLETYPE::CPM:
 		recvData(pattern, "\"DB920  CPM2CO\".\"WorkMode\"");
@@ -42,7 +42,7 @@ NumericalShow JHUIDataSync::packNumericalShow()
 		recvData(ns.oil_pressure, "\"DB101  SystemStatus\".\"OilPressure\"");
 		recvData(ns.next_furnaceId, "\"DB200  HMI\".\"Sys-GoalStove\"");
 		recvData(ns.furnaceId, "\"DB200  HMI\".\"Sys-CurrentStove\"");
-		recvData(&ns.speed, "\"VirtualCPM1ToUE\".\"CPM_MoveSpeed\"");
+		recvData(ns.speed, "\"VirtualCPM1ToUE\".\"CPM_MoveSpeed\"");
 		break;
 	case VEHICLETYPE::SCM:
 		recvData(pattern, "\"DB920  SCM2CO\".\"WorkMode\"");
@@ -52,7 +52,7 @@ NumericalShow JHUIDataSync::packNumericalShow()
 		recvData(ns.scm_states, "\"DB101  SystemStatus\".\"CoalTampStatus\"");
 		recvData(ns.next_furnaceId, "\"DB200  HMI\".\"Sys-GoalStove\"");
 		recvData(ns.furnaceId, "\"DB200  HMI\".\"Sys-CurrentStove\"");
-		recvData(&ns.speed, "\"VirtualSCM1ToUE\".\"SCM_MoveSpeed\"");
+		recvData(ns.speed, "\"VirtualSCM1ToUE\".\"SCM_MoveSpeed\"");
 		break;
 	case VEHICLETYPE::CGTC:
 		recvData(pattern, "\"DB920  CGTC2CO\".\"WorkMode\"");
@@ -61,7 +61,7 @@ NumericalShow JHUIDataSync::packNumericalShow()
 		recvData(ns.oil_pressure, "\"DB012  SystemStatus\".\"OilPressure\"");
 		recvData(ns.next_furnaceId, "\"DB500  ControlFromUE\".\"Sys-Targe_Oven\"");
 		recvData(ns.furnaceId, "\"DB012  SystemStatus\".\"MiddleStoveNum\"");
-		recvData(&ns.speed, "\"VirtualCGTC1ToUE\".\"CGTC_MoveSpeed\"");
+		recvData(ns.speed, "\"VirtualCGTC1ToUE\".\"CGTC_MoveSpeed\"");
 		break;
 	case VEHICLETYPE::HCBC:
 		recvData(pattern, "\"DB920  HCBC2CO\".\"WorkMode\"");
@@ -71,7 +71,7 @@ NumericalShow JHUIDataSync::packNumericalShow()
 		recvData(ns.hcbc_states, "\"DB101  SystemStatus\".\"WetCokeQuenchingAllow\"");
 		recvData(ns.next_furnaceId, "\"DB200  HMI\".\"Sys-GoalStove\"");
 		recvData(ns.furnaceId, "\"DB200  HMI\".\"Sys-CurrentStove\"");
-		recvData(&ns.speed, "\"VirtualHCBC1ToUE\".\"HCBC_MoveSpeed\"");
+		recvData(ns.speed, "\"VirtualHCBC1ToUE\".\"HCBC_MoveSpeed\"");
 		break;
 	default:
 		break;
@@ -513,7 +513,7 @@ CTCTopUI JHUIDataSync::packCTCTopUI()
 	CTCTopUI ui;
 	
 	recvData(ui.furnaceId, "\"DB200  HMI\".\"Sys-CurrentStove\"");
-	recvData(&ui.position, "\"VirtualHCBC1ToUE\".\"CTC_Location\"");
+	recvData(ui.position, "\"VirtualHCBC1ToUE\".\"CTC_Location\"");
 	recvData(ui.temperature, "\"DB101  SystemStatus\".\"OilTemperature\"");
 	recvData(ui.compressor, "");
 
@@ -883,67 +883,87 @@ CTCDeviceStatusUI JHUIDataSync::packCTCDeviceStatusUI()
 	return CTCDeviceStatusUI();
 }
 
-void JHUIDataSync::recvData(bool& state, const char* strNodeId)
-{
-	UA_NodeId nodeId = UA_NODEID_STRING(3, const_cast<char*>(strNodeId));
+//void JHUIDataSync::recvData(bool& state, const char* strNodeId)
+//{
+//	UA_NodeId nodeId = UA_NODEID_STRING(3, const_cast<char*>(strNodeId));
+//
+//	UA_Variant value; /* Variants can hold scalar values and arrays of any type */
+//	UA_Variant_init(&value);
+//
+//	// 客户端接收"Testt"传来的数据
+//	UA_StatusCode retval = UA_Client_readValueAttribute(m_recvFromPLC, nodeId, &value);
+//
+//	// 判断接收状态和数据类型是否符合
+//	if (retval == UA_STATUSCODE_GOOD && UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_BOOLEAN]))
+//	{
+//		state = *(bool*)value.data;
+//	}
+//	UA_Variant_clear(&value);
+//}
+//
+//void JHUIDataSync::recvData(UINT8& state, const char* strNodeId)
+//{
+//	UA_NodeId nodeId = UA_NODEID_STRING(3, const_cast<char*>(strNodeId));
+//
+//	UA_Variant value; /* Variants can hold scalar values and arrays of any type */
+//	UA_Variant_init(&value);
+//
+//	// 客户端接收"Testt"传来的数据
+//	UA_StatusCode retval = UA_Client_readValueAttribute(m_recvFromPLC, nodeId, &value);
+//
+//	// 判断接收状态和数据类型是否符合
+//	if (retval == UA_STATUSCODE_GOOD && UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_BYTE]))
+//	{
+//		state = *(UINT8*)value.data;
+//	}
+//	UA_Variant_clear(&value);
+//}
+//
+//void JHUIDataSync::recvData(int& state, const char* strNodeId)
+//{
+//	UA_NodeId nodeId = UA_NODEID_STRING(3, const_cast<char*>(strNodeId));
+//
+//	UA_Variant value; /* Variants can hold scalar values and arrays of any type */
+//	UA_Variant_init(&value);
+//
+//	// 客户端接收"Testt"传来的数据
+//	UA_StatusCode retval = UA_Client_readValueAttribute(m_recvFromPLC, nodeId, &value);
+//
+//	// 判断接收状态和数据类型是否符合
+//	if (retval == UA_STATUSCODE_GOOD)
+//	{
+//		if (UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_INT32]))
+//		{
+//			state = *(int*)value.data;
+//		}
+//		else if (UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_INT16]))
+//		{
+//			state = *(short*)value.data;
+//		}
+//	}
+//	UA_Variant_clear(&value);
+//}
+//
+//void JHUIDataSync::recvData(float* state, const char* strNodeId)
+//{
+//	UA_NodeId nodeId = UA_NODEID_STRING(3, const_cast<char*>(strNodeId));
+//
+//	UA_Variant value; /* Variants can hold scalar values and arrays of any type */
+//	UA_Variant_init(&value);
+//
+//	// 客户端接收 strNodeId 传来的数据
+//	UA_StatusCode retval = UA_Client_readValueAttribute(m_recvFromPLC, nodeId, &value);
+//
+//	// 判断接收状态和数据类型是否符合
+//	if (retval == UA_STATUSCODE_GOOD && UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_FLOAT]))
+//	{
+//		*state = *(float*)value.data;
+//	}
+//	UA_Variant_clear(&value);
+//}
 
-	UA_Variant value; /* Variants can hold scalar values and arrays of any type */
-	UA_Variant_init(&value);
-
-	// 客户端接收"Testt"传来的数据
-	UA_StatusCode retval = UA_Client_readValueAttribute(m_recvFromPLC, nodeId, &value);
-
-	// 判断接收状态和数据类型是否符合
-	if (retval == UA_STATUSCODE_GOOD && UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_BOOLEAN]))
-	{
-		state = *(bool*)value.data;
-	}
-	UA_Variant_clear(&value);
-}
-
-void JHUIDataSync::recvData(UINT8& state, const char* strNodeId)
-{
-	UA_NodeId nodeId = UA_NODEID_STRING(3, const_cast<char*>(strNodeId));
-
-	UA_Variant value; /* Variants can hold scalar values and arrays of any type */
-	UA_Variant_init(&value);
-
-	// 客户端接收"Testt"传来的数据
-	UA_StatusCode retval = UA_Client_readValueAttribute(m_recvFromPLC, nodeId, &value);
-
-	// 判断接收状态和数据类型是否符合
-	if (retval == UA_STATUSCODE_GOOD && UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_BYTE]))
-	{
-		state = *(UINT8*)value.data;
-	}
-}
-
-void JHUIDataSync::recvData(int& state, const char* strNodeId)
-{
-	UA_NodeId nodeId = UA_NODEID_STRING(3, const_cast<char*>(strNodeId));
-
-	UA_Variant value; /* Variants can hold scalar values and arrays of any type */
-	UA_Variant_init(&value);
-
-	// 客户端接收"Testt"传来的数据
-	UA_StatusCode retval = UA_Client_readValueAttribute(m_recvFromPLC, nodeId, &value);
-
-	// 判断接收状态和数据类型是否符合
-	if (retval == UA_STATUSCODE_GOOD)
-	{
-		if (UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_INT32]))
-		{
-			state = *(int*)value.data;
-		}
-		else if (UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_INT16]))
-		{
-			state = *(short*)value.data;
-		}
-	}
-	UA_Variant_clear(&value);
-}
-
-void JHUIDataSync::recvData(float* state, const char* strNodeId)
+template<typename T>
+void JHUIDataSync::recvData(T& state, const char* strNodeId)
 {
 	UA_NodeId nodeId = UA_NODEID_STRING(3, const_cast<char*>(strNodeId));
 
@@ -954,9 +974,9 @@ void JHUIDataSync::recvData(float* state, const char* strNodeId)
 	UA_StatusCode retval = UA_Client_readValueAttribute(m_recvFromPLC, nodeId, &value);
 
 	// 判断接收状态和数据类型是否符合
-	if (retval == UA_STATUSCODE_GOOD && UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_FLOAT]))
+	if (retval == UA_STATUSCODE_GOOD)
 	{
-		*state = *(float*)value.data;
+		state = *(T*)value.data;
 	}
 	UA_Variant_clear(&value);
 }

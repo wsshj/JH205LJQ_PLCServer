@@ -396,6 +396,9 @@ void JHOperateSync::scmOperateSync(int key, UINT8 value)
 		comparisonData(value, "\"DB200  HMI\".\"Manual-RearArmorBackward\"", "\"DB200  HMI\".\"Manual-RearArmorForward\"");
 		break;
 	case 31103:
+		comparisonData(value, "\"DB200  HMI\".\"Manual-RearArmorLockClose\"", "\"DB200  HMI\".\"Manual-RearArmorLockOpen\"");
+		break;
+	case 31104:
 		comparisonData(value, "\"DB200  HMI\".\"Manual-CoalLoadBaseBoardBackward\"", "\"DB200  HMI\".\"Manual-CoalLoadBaseBoardForward\"");
 		break;
 	case 31201:

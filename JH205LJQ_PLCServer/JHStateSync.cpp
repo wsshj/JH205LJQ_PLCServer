@@ -45,8 +45,11 @@ void JHStateSync::operator()()
 	startStateSync();
 }
 
-UA_Byte* JHStateSync::recvData(UA_NodeId nodeId)
+template <typename T>
+T* JHStateSync::recvData(const char* strNodeId)
 {
+	UA_NodeId nodeId = UA_NODEID_STRING(3, const_cast<char*>(strNodeId));
+
 	UA_Variant value; /* Variants can hold scalar values and arrays of any type */
 	UA_Variant_init(&value);
 
@@ -64,10 +67,15 @@ UA_Byte* JHStateSync::recvData(UA_NodeId nodeId)
 
 		if (strBody.length > 0)
 		{
-			return strBody.data;
+			T data = *(T*)strBody.data;
+
+			UA_Variant_clear(&value);
+
+			return &data;
 		}
 	}
 
+	UA_Variant_clear(&value);
 	return nullptr;
 }
 
@@ -84,9 +92,13 @@ bool JHStateSync::recvBoolData(const char* strNodeId)
 	// 判断接收状态和数据类型是否符合
 	if (retval == UA_STATUSCODE_GOOD && UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_BOOLEAN]))
 	{
-		return *(bool*)value.data;
-	}
+		bool data = *(bool*)value.data;
 
+		UA_Variant_clear(&value);
+
+		return data;
+	}
+	UA_Variant_clear(&value);
 	return 0;
 }
 
@@ -96,49 +108,23 @@ void JHStateSync::startStateSync()
 	switch (m_vehicleType)
 	{
 	case VEHICLETYPE::CTC:
-		while (true){ comparisonData((CTCStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualCTC1ToUE\""))); }
+		while (true){ comparisonData(recvData<CTCStateData>("\"VirtualCTC1ToUE\"")); }
 		break;
 	case VEHICLETYPE::CPM:
-		while (true){ comparisonData((CPMStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualCPM1ToUE\""))); }
+		while (true){ comparisonData(recvData<CPMStateData>("\"VirtualCPM1ToUE\"")); }
 		break;
 	case VEHICLETYPE::SCM:
-		while (true){ comparisonData((SCMStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualSCM1ToUE\""))); }
+		while (true){ comparisonData(recvData<SCMStateData>("\"VirtualSCM1ToUE\"")); }
 		break;
 	case VEHICLETYPE::CGTC:
-		while (true){ comparisonData((CGTCStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualCGTC1ToUE\""))); }
+		while (true){ comparisonData(recvData<CGTCStateData>("\"VirtualCGTC1ToUE\"")); }
 		break;
 	case VEHICLETYPE::HCBC:
-		while (true){ comparisonData((HCBCStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualHCBC1ToUE\""))); }
+		while (true){ comparisonData(recvData<HCBCStateData>("\"VirtualHCBC1ToUE\"")); }
 		break;
 	default:
 		break;
 	}
-
-	//while (true)
-	//{
-	//	// 将数据转成相应的数据结构,然后处理
-	//	switch (m_vehicleType)
-	//	{
-	//	case VEHICLETYPE::CTC:
-	//		comparisonData((CTCStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualCTC1ToUE\"")));
-	//		break;
-	//	case VEHICLETYPE::CPM:
-	//		comparisonData((CPMStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualCPM1ToUE\"")));
-	//		break;
-	//	case VEHICLETYPE::SCM:
-	//		comparisonData((SCMStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualSCM1ToUE\"")));
-	//		break;
-	//	case VEHICLETYPE::CGTC:
-	//		comparisonData((CGTCStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualCGTC1ToUE\"")));
-	//		break;
-	//	case VEHICLETYPE::HCBC:
-	//		comparisonData((HCBCStateData*)recvData(UA_NODEID_STRING(3, (char*)"\"VirtualHCBC1ToUE\"")));
-	//		break;
-	//	default:
-	//		break;
-	//	}
-	//	//Sleep(0);
-	//}
 }
 
 void JHStateSync::sendData(float& lastValue, float newValue, INT32 key, float min, float max)

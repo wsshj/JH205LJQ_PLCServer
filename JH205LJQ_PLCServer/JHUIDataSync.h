@@ -403,17 +403,20 @@ public:
 	// 打包设备状态
 	CTCDeviceStatusUI packCTCDeviceStatusUI();
 
-	// 接收bool类型数据
-	void recvData(bool& state, const char* strNodeId);
+	//// 接收bool类型数据
+	//void recvData(bool& state, const char* strNodeId);
 
-	// 接收UINT8类型数据
-	void recvData(UINT8& state, const char* strNodeId);
+	//// 接收UINT8类型数据
+	//void recvData(UINT8& state, const char* strNodeId);
 
-	// 接收int类型数据
-	void recvData(int& state, const char* strNodeId);
+	//// 接收int类型数据
+	//void recvData(int& state, const char* strNodeId);
 
-	// 接收float类型数据
-	void recvData(float* state, const char* strNodeId);
+	//// 接收float类型数据
+	//void recvData(float* state, const char* strNodeId);
+
+	template <typename T>
+	void recvData(T& state, const char* strNodeId);
 
 	void startSync();
 

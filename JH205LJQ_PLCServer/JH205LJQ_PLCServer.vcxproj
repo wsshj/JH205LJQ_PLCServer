@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="configfile.cpp" />
     <ClCompile Include="JH205LJQ_PLCServer.cpp" />
     <ClCompile Include="JHNetwork.cpp" />
     <ClCompile Include="JHUIDataSync.cpp" />
@@ -147,6 +148,7 @@
     <ClCompile Include="JHStateSync.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="configfile.h" />
     <ClInclude Include="JHNetwork.h" />
     <ClInclude Include="JHUIDataSync.h" />
     <ClInclude Include="open62541.h" />

@@ -33,6 +33,9 @@
     <ClCompile Include="JHUIDataSync.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="configfile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JHNetwork.h">
@@ -48,6 +51,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="JHUIDataSync.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="configfile.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

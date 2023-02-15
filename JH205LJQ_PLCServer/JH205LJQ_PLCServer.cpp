@@ -10,6 +10,7 @@
 #include "JHOperateSync.h"
 #include "JHStateSync.h"
 #include "JHUIDataSync.h"
+#include "configfile.h"
 
 float fCTCThreshold = 0;
 float fCPMThreshold = 0;
@@ -19,37 +20,20 @@ float fHCBCThreshold = 0;
 
 #define ALL
 
-string readConfig(string strPath)
-{
-    ifstream fin;
-    fin.open(strPath, ios::in);
-    if (!fin.is_open())
-    {
-        cout << "无法找到这个文件！" << endl;
-        return nullptr;
-    }
-    string buff;
-    while (getline(fin, buff))
-    {
-        cout << buff << endl;
-    }
-    fin.close();
-
-    return buff;
-}
-
 int main()
 {
     JHNetwork np;
 
-    //const char* sendHost = "127.0.0.1";
-    //const char* recvHost = "127.0.0.1";
-    //const char* sendHost = "192.168.110.229";
-    //const char* sendHost = "192.168.0.255";
-    const char* sendHost = "10.88.2.50";
-    //const char* recvHost = "192.168.0.207";
-    string str = readConfig("config.txt");
-    const char* recvHost = str.c_str();
+    ConfigFile cfg("config.cfg");
+
+    //string str = readConfig("config.txt");
+    //const char* recvHost = str.c_str();
+
+    string strRecv = cfg.getvalue<string>("recv_host");
+    const char* recvHost = strRecv.c_str();
+
+    string strSend = cfg.getvalue<string>("send_host");
+    const char* sendHost = strSend.c_str();
 
     // 接收客户端操作
     SocketUDP* recvFromUE = np.connectUDP(recvHost, 9001);

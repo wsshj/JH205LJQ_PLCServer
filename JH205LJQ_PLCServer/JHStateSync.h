@@ -117,7 +117,8 @@ public:
 
 	void operator()();
 
-	UA_Byte* recvData(UA_NodeId nodeId);
+	template <typename T>
+	T* recvData(const char* strNodeId);
 
 	bool recvBoolData(const char * strNodeId);
 
