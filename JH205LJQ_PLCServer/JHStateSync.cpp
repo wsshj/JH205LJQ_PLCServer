@@ -46,7 +46,7 @@ void JHStateSync::operator()()
 }
 
 template <typename T>
-T* JHStateSync::recvData(const char* strNodeId)
+T JHStateSync::recvData(const char* strNodeId)
 {
 	UA_NodeId nodeId = UA_NODEID_STRING(3, const_cast<char*>(strNodeId));
 
@@ -71,12 +71,12 @@ T* JHStateSync::recvData(const char* strNodeId)
 
 			UA_Variant_clear(&value);
 
-			return &data;
+			return data;
 		}
 	}
 
 	UA_Variant_clear(&value);
-	return nullptr;
+	return T();
 }
 
 bool JHStateSync::recvBoolData(const char* strNodeId)
@@ -178,91 +178,85 @@ void JHStateSync::sendData(bool& lastValue, bool newValue, INT32 key)
 	lastValue = newValue;
 }
 
-void JHStateSync::comparisonData(CTCStateData* pd)
+void JHStateSync::comparisonData(CTCStateData pd)
 { 
-	if (pd == nullptr)
+	if (abs(m_ctcLastData->CTC_Location - pd.CTC_Location) > fCTCThreshold || abs(m_ctcLastData->CTC_MoveSpeed - pd.CTC_MoveSpeed) > fCTCThreshold)
 	{
-		cout << "StateData is null" << endl;
-		return;
+		sendData(m_ctcLastData->CTC_Location, pd.CTC_Location, 10001, 0, 152000);
+		sendData(m_ctcLastData->CTC_MoveSpeed, pd.CTC_MoveSpeed, 10002, 0, 99999);
+		//cout << "Location:" << pd.CTC_Location << endl;
+		//cout << "CTC_MoveSpeed:" << pd.CTC_MoveSpeed << endl;
 	}
 
-	if (abs(m_ctcLastData->CTC_Location - pd->CTC_Location) > fCTCThreshold || abs(m_ctcLastData->CTC_MoveSpeed - pd->CTC_MoveSpeed) > fCTCThreshold)
+	/*if (abs(m_ctcLastData->CTC_MoveSpeed - pd.CTC_MoveSpeed) > fCTCThreshold)
 	{
-		sendData(m_ctcLastData->CTC_Location, pd->CTC_Location, 10001, 0, 152000);
-		sendData(m_ctcLastData->CTC_MoveSpeed, pd->CTC_MoveSpeed, 10002, 0, 99999);
-		//cout << "Location:" << pd->CTC_Location << endl;
-		//cout << "CTC_MoveSpeed:" << pd->CTC_MoveSpeed << endl;
-	}
-
-	/*if (abs(m_ctcLastData->CTC_MoveSpeed - pd->CTC_MoveSpeed) > fCTCThreshold)
-	{
-		sendData(m_ctcLastData->CTC_MoveSpeed, pd->CTC_MoveSpeed, 10002, 0, 99999);
-		cout << "CTC_MoveSpeed:" << pd->CTC_MoveSpeed << endl;
+		sendData(m_ctcLastData->CTC_MoveSpeed, pd.CTC_MoveSpeed, 10002, 0, 99999);
+		cout << "CTC_MoveSpeed:" << pd.CTC_MoveSpeed << endl;
 	}*/
 
-	if (abs(m_ctcLastData->CTC_GetDoorTrolly_Location - pd->CTC_GetDoorTrolly_Location) > fCTCThreshold)
+	if (abs(m_ctcLastData->CTC_GetDoorTrolly_Location - pd.CTC_GetDoorTrolly_Location) > fCTCThreshold)
 	{
-		sendData(m_ctcLastData->CTC_GetDoorTrolly_Location, pd->CTC_GetDoorTrolly_Location, 10101, 0, 2838);
+		sendData(m_ctcLastData->CTC_GetDoorTrolly_Location, pd.CTC_GetDoorTrolly_Location, 10101, 0, 2838);
 	}
 
-	if (abs(m_ctcLastData->CTC_LatchPressIn_Location - pd->CTC_LatchPressIn_Location) > fCTCThreshold)
+	if (abs(m_ctcLastData->CTC_LatchPressIn_Location - pd.CTC_LatchPressIn_Location) > fCTCThreshold)
 	{
-		sendData(m_ctcLastData->CTC_LatchPressIn_Location, pd->CTC_LatchPressIn_Location, 10102, 0, 40);
+		sendData(m_ctcLastData->CTC_LatchPressIn_Location, pd.CTC_LatchPressIn_Location, 10102, 0, 40);
 	}
 
-	if (abs(m_ctcLastData->CTC_LatchTurn_Location - pd->CTC_LatchTurn_Location) > fCTCThreshold)
+	if (abs(m_ctcLastData->CTC_LatchTurn_Location - pd.CTC_LatchTurn_Location) > fCTCThreshold)
 	{
-		sendData(m_ctcLastData->CTC_LatchTurn_Location, pd->CTC_LatchTurn_Location, 10103, 0, 150);
+		sendData(m_ctcLastData->CTC_LatchTurn_Location, pd.CTC_LatchTurn_Location, 10103, 0, 150);
 	}
 
-	if (abs(m_ctcLastData->CTC_LiftDoor_Location - pd->CTC_LiftDoor_Location) > fCTCThreshold)
+	if (abs(m_ctcLastData->CTC_LiftDoor_Location - pd.CTC_LiftDoor_Location) > fCTCThreshold)
 	{
-		sendData(m_ctcLastData->CTC_LiftDoor_Location, pd->CTC_LiftDoor_Location, 10104, 0, 530);
+		sendData(m_ctcLastData->CTC_LiftDoor_Location, pd.CTC_LiftDoor_Location, 10104, 0, 530);
 	}
 
-	if (abs(m_ctcLastData->CTC_CokeTrayUpDown_Location - pd->CTC_CokeTrayUpDown_Location) > fCTCThreshold)
+	if (abs(m_ctcLastData->CTC_CokeTrayUpDown_Location - pd.CTC_CokeTrayUpDown_Location) > fCTCThreshold)
 	{
-		sendData(m_ctcLastData->CTC_CokeTrayUpDown_Location, pd->CTC_CokeTrayUpDown_Location, 10201, 0, 500);
+		sendData(m_ctcLastData->CTC_CokeTrayUpDown_Location, pd.CTC_CokeTrayUpDown_Location, 10201, 0, 500);
 	}
 
-	if (abs(m_ctcLastData->CTC_CokeTrayFrontRear_Location - pd->CTC_CokeTrayFrontRear_Location) > fCTCThreshold)
+	if (abs(m_ctcLastData->CTC_CokeTrayFrontRear_Location - pd.CTC_CokeTrayFrontRear_Location) > fCTCThreshold)
 	{
-		sendData(m_ctcLastData->CTC_CokeTrayFrontRear_Location, pd->CTC_CokeTrayFrontRear_Location, 10202, 0, 250);
+		sendData(m_ctcLastData->CTC_CokeTrayFrontRear_Location, pd.CTC_CokeTrayFrontRear_Location, 10202, 0, 250);
 	}
 
-	if (abs(m_ctcLastData->CTC_DoorCleanerTrolly_Location - pd->CTC_DoorCleanerTrolly_Location) > fCTCThreshold)
+	if (abs(m_ctcLastData->CTC_DoorCleanerTrolly_Location - pd.CTC_DoorCleanerTrolly_Location) > fCTCThreshold)
 	{
-		sendData(m_ctcLastData->CTC_DoorCleanerTrolly_Location, pd->CTC_DoorCleanerTrolly_Location, 10301, 0, 700);
+		sendData(m_ctcLastData->CTC_DoorCleanerTrolly_Location, pd.CTC_DoorCleanerTrolly_Location, 10301, 0, 700);
 	}
 
-	if (abs(m_ctcLastData->CTC_SideCutter_Location - pd->CTC_SideCutter_Location) > fCTCThreshold)
+	if (abs(m_ctcLastData->CTC_SideCutter_Location - pd.CTC_SideCutter_Location) > fCTCThreshold)
 	{
-		sendData(m_ctcLastData->CTC_SideCutter_Location, pd->CTC_SideCutter_Location, 10302, 0, 500);
+		sendData(m_ctcLastData->CTC_SideCutter_Location, pd.CTC_SideCutter_Location, 10302, 0, 500);
 	}
 
-	if (abs(m_ctcLastData->CTC_UpperCutter_Location - pd->CTC_UpperCutter_Location) > fCTCThreshold)
+	if (abs(m_ctcLastData->CTC_UpperCutter_Location - pd.CTC_UpperCutter_Location) > fCTCThreshold)
 	{
-		sendData(m_ctcLastData->CTC_UpperCutter_Location, pd->CTC_UpperCutter_Location, 10303, 0, 250);
+		sendData(m_ctcLastData->CTC_UpperCutter_Location, pd.CTC_UpperCutter_Location, 10303, 0, 250);
 	}
 
-	if (abs(m_ctcLastData->CTC_LowerCutter_Location - pd->CTC_LowerCutter_Location) > fCTCThreshold)
+	if (abs(m_ctcLastData->CTC_LowerCutter_Location - pd.CTC_LowerCutter_Location) > fCTCThreshold)
 	{
-		sendData(m_ctcLastData->CTC_LowerCutter_Location, pd->CTC_LowerCutter_Location, 10304, 0, 250);
+		sendData(m_ctcLastData->CTC_LowerCutter_Location, pd.CTC_LowerCutter_Location, 10304, 0, 250);
 	}
 
-	if (abs(m_ctcLastData->CTC_FrameCleanerTrolly_Location - pd->CTC_FrameCleanerTrolly_Location) > fCTCThreshold)
+	if (abs(m_ctcLastData->CTC_FrameCleanerTrolly_Location - pd.CTC_FrameCleanerTrolly_Location) > fCTCThreshold)
 	{
-		sendData(m_ctcLastData->CTC_FrameCleanerTrolly_Location, pd->CTC_FrameCleanerTrolly_Location, 10401, 0, 2500);
+		sendData(m_ctcLastData->CTC_FrameCleanerTrolly_Location, pd.CTC_FrameCleanerTrolly_Location, 10401, 0, 2500);
 	}
 
-	if (abs(m_ctcLastData->CTC_FrameCleanMachine_Location - pd->CTC_FrameCleanMachine_Location) > fCTCThreshold)
+	if (abs(m_ctcLastData->CTC_FrameCleanMachine_Location - pd.CTC_FrameCleanMachine_Location) > fCTCThreshold)
 	{
-		sendData(m_ctcLastData->CTC_FrameCleanMachine_Location, pd->CTC_FrameCleanMachine_Location, 10402, 0, 500);
+		sendData(m_ctcLastData->CTC_FrameCleanMachine_Location, pd.CTC_FrameCleanMachine_Location, 10402, 0, 500);
 	}
 
-	if (abs(m_ctcLastData->CTC_CokeGrid_Location - pd->CTC_CokeGrid_Location) > fCTCThreshold)
+	if (abs(m_ctcLastData->CTC_CokeGrid_Location - pd.CTC_CokeGrid_Location) > fCTCThreshold)
 	{
-		sendData(m_ctcLastData->CTC_CokeGrid_Location, pd->CTC_CokeGrid_Location, 10501, 0, 2950);
+		sendData(m_ctcLastData->CTC_CokeGrid_Location, pd.CTC_CokeGrid_Location, 10501, 0, 2950);
 	}
 	if (fCTCThreshold < 0)
 	{	
@@ -271,77 +265,72 @@ void JHStateSync::comparisonData(CTCStateData* pd)
 	}
 }
 
-void JHStateSync::comparisonData(CPMStateData* pd)
+void JHStateSync::comparisonData(CPMStateData pd)
 {
-	if (pd == nullptr)
+	if (abs(m_cpmLastData->CPM_Location - pd.CPM_Location) > fCPMThreshold || abs(m_cpmLastData->CPM_MoveSpeed - pd.CPM_MoveSpeed) > fCPMThreshold)
 	{
-		cout << "StateData is null" << endl;
-		return;
-	}
-	if (abs(m_cpmLastData->CPM_Location - pd->CPM_Location) > fCPMThreshold || abs(m_cpmLastData->CPM_MoveSpeed - pd->CPM_MoveSpeed) > fCPMThreshold)
-	{
-		sendData(m_cpmLastData->CPM_Location, pd->CPM_Location, 20001, 0, 152000);
-		sendData(m_cpmLastData->CPM_MoveSpeed, pd->CPM_MoveSpeed, 20002, 0, 99999);
+		sendData(m_cpmLastData->CPM_Location, pd.CPM_Location, 20001, 0, 152000);
+		sendData(m_cpmLastData->CPM_MoveSpeed, pd.CPM_MoveSpeed, 20002, 0, 99999);
 	}
 
-	if (abs(m_cpmLastData->CPM_GetDoorTrolly_Location - pd->CPM_GetDoorTrolly_Location) > fCPMThreshold)
+	if (abs(m_cpmLastData->CPM_GetDoorTrolly_Location - pd.CPM_GetDoorTrolly_Location) > fCPMThreshold)
 	{
-		sendData(m_cpmLastData->CPM_GetDoorTrolly_Location, pd->CPM_GetDoorTrolly_Location, 20101, 0, 2812);
+		sendData(m_cpmLastData->CPM_GetDoorTrolly_Location, pd.CPM_GetDoorTrolly_Location, 20101, 0, 2812);
 	}
 
-	if (abs(m_cpmLastData->CPM_LatchPressIn_Location - pd->CPM_LatchPressIn_Location) > fCPMThreshold)
+	if (abs(m_cpmLastData->CPM_LatchPressIn_Location - pd.CPM_LatchPressIn_Location) > fCPMThreshold)
 	{
-		sendData(m_cpmLastData->CPM_LatchPressIn_Location, pd->CPM_LatchPressIn_Location, 20102, 0, 40);
+		sendData(m_cpmLastData->CPM_LatchPressIn_Location, pd.CPM_LatchPressIn_Location, 20102, 0, 40);
 	}
 
-	if (abs(m_cpmLastData->CPM_LatchTurn_Location - pd->CPM_LatchTurn_Location) > fCPMThreshold)
+	if (abs(m_cpmLastData->CPM_LatchTurn_Location - pd.CPM_LatchTurn_Location) > fCPMThreshold)
 	{
-		sendData(m_cpmLastData->CPM_LatchTurn_Location, pd->CPM_LatchTurn_Location, 20103, 0, 150);
+		sendData(m_cpmLastData->CPM_LatchTurn_Location, pd.CPM_LatchTurn_Location, 20103, 0, 150);
 	}
 
-	if (abs(m_cpmLastData->CPM_LiftDoor_Location - pd->CPM_LiftDoor_Location) > fCPMThreshold)
+	if (abs(m_cpmLastData->CPM_LiftDoor_Location - pd.CPM_LiftDoor_Location) > fCPMThreshold)
 	{
-		sendData(m_cpmLastData->CPM_LiftDoor_Location, pd->CPM_LiftDoor_Location, 20104, 0, 342);
+		sendData(m_cpmLastData->CPM_LiftDoor_Location, pd.CPM_LiftDoor_Location, 20104, 0, 342);
 	}
 
-	if (abs(m_cpmLastData->CPM_DoorCleanerTrolly_Location - pd->CPM_DoorCleanerTrolly_Location) > fCPMThreshold)
+	if (abs(m_cpmLastData->CPM_DoorCleanerTrolly_Location - pd.CPM_DoorCleanerTrolly_Location) > fCPMThreshold)
 	{
-		sendData(m_cpmLastData->CPM_DoorCleanerTrolly_Location, pd->CPM_DoorCleanerTrolly_Location, 20201, 0, 700);
+		sendData(m_cpmLastData->CPM_DoorCleanerTrolly_Location, pd.CPM_DoorCleanerTrolly_Location, 20201, 0, 700);
 	}
 
-	if (abs(m_cpmLastData->CPM_SideCutter_Location - pd->CPM_SideCutter_Location) > fCPMThreshold)
+	if (abs(m_cpmLastData->CPM_SideCutter_Location - pd.CPM_SideCutter_Location) > fCPMThreshold)
 	{
-		sendData(m_cpmLastData->CPM_SideCutter_Location, pd->CPM_SideCutter_Location, 20202, 0, 500);
+		sendData(m_cpmLastData->CPM_SideCutter_Location, pd.CPM_SideCutter_Location, 20202, 0, 500);
 	}
 
-	if (abs(m_cpmLastData->CPM_UpperCutter_Location - pd->CPM_UpperCutter_Location) > fCPMThreshold)
+	if (abs(m_cpmLastData->CPM_UpperCutter_Location - pd.CPM_UpperCutter_Location) > fCPMThreshold)
 	{
-		sendData(m_cpmLastData->CPM_UpperCutter_Location, pd->CPM_UpperCutter_Location, 20203, 0, 250);
+		sendData(m_cpmLastData->CPM_UpperCutter_Location, pd.CPM_UpperCutter_Location, 20203, 0, 250);
 	}
 
-	if (abs(m_cpmLastData->CPM_LowerCutter_Location - pd->CPM_LowerCutter_Location) > fCPMThreshold)
+	if (abs(m_cpmLastData->CPM_LowerCutter_Location - pd.CPM_LowerCutter_Location) > fCPMThreshold)
 	{
-		sendData(m_cpmLastData->CPM_LowerCutter_Location, pd->CPM_LowerCutter_Location, 20204, 0, 250);
+		sendData(m_cpmLastData->CPM_LowerCutter_Location, pd.CPM_LowerCutter_Location, 20204, 0, 250);
 	}
 
-	if (abs(m_cpmLastData->CPM_FrameCleanerTrolly_Location - pd->CPM_FrameCleanerTrolly_Location) > fCPMThreshold)
+	if (abs(m_cpmLastData->CPM_FrameCleanerTrolly_Location - pd.CPM_FrameCleanerTrolly_Location) > fCPMThreshold)
 	{
-		sendData(m_cpmLastData->CPM_FrameCleanerTrolly_Location, pd->CPM_FrameCleanerTrolly_Location, 20301, 0, 2000);
+		sendData(m_cpmLastData->CPM_FrameCleanerTrolly_Location, pd.CPM_FrameCleanerTrolly_Location, 20301, 0, 2000);
 	}
 
-	if (abs(m_cpmLastData->CPM_FrameCleanMachine_Location - pd->CPM_FrameCleanMachine_Location) > fCPMThreshold)
+	if (abs(m_cpmLastData->CPM_FrameCleanMachine_Location - pd.CPM_FrameCleanMachine_Location) > fCPMThreshold)
 	{
-		sendData(m_cpmLastData->CPM_FrameCleanMachine_Location, pd->CPM_FrameCleanMachine_Location, 20302, 0, 500);
+		sendData(m_cpmLastData->CPM_FrameCleanMachine_Location, pd.CPM_FrameCleanMachine_Location, 20302, 0, 500);
 	}
 
-	if (abs(m_cpmLastData->CPM_CokePushRod_Location - pd->CPM_CokePushRod_Location) > fCPMThreshold)
+	if (abs(m_cpmLastData->CPM_CokePushRod_Location - pd.CPM_CokePushRod_Location) > fCPMThreshold)
 	{
-		sendData(m_cpmLastData->CPM_CokePushRod_Location, pd->CPM_CokePushRod_Location, 20401, 0, 25000);
+		sendData(m_cpmLastData->CPM_CokePushRod_Location, pd.CPM_CokePushRod_Location, 20401, 0, 25000);
 	}
 
-	if (abs(m_cpmLastData->CPM_CoalClearMachine_Location - pd->CPM_CoalClearMachine_Location) > fCPMThreshold)
+	if (abs(m_cpmLastData->CPM_CoalClearMachine_Location - pd.CPM_CoalClearMachine_Location) > fCPMThreshold)
 	{
-		sendData(m_cpmLastData->CPM_CoalClearMachine_Location, pd->CPM_CoalClearMachine_Location, 20501, 0, 1500);
+		sendData(m_cpmLastData->CPM_CoalClearMachine_Location, pd.CPM_CoalClearMachine_Location, 20501, 0, 1500);
 	}
 	if (fCPMThreshold < 0)
 	{
@@ -350,52 +339,47 @@ void JHStateSync::comparisonData(CPMStateData* pd)
 	}
 }
 
-void JHStateSync::comparisonData(SCMStateData* pd)
+void JHStateSync::comparisonData(SCMStateData pd)
 {
-	if (pd == nullptr)
+	if (abs(m_scmLastData->SCM_Location - pd.SCM_Location) > fSCMThreshold || abs(m_scmLastData->SCM_MoveSpeed - pd.SCM_MoveSpeed) > fSCMThreshold)
 	{
-		cout << "StateData is null" << endl;
-		return;
-	}
-	if (abs(m_scmLastData->SCM_Location - pd->SCM_Location) > fSCMThreshold || abs(m_scmLastData->SCM_MoveSpeed - pd->SCM_MoveSpeed) > fSCMThreshold)
-	{
-		sendData(m_scmLastData->SCM_Location, pd->SCM_Location, 30001, 0, 180100);
-		sendData(m_scmLastData->SCM_MoveSpeed, pd->SCM_MoveSpeed, 30002, 0, 99999);
+		sendData(m_scmLastData->SCM_Location, pd.SCM_Location, 30001, 0, 180100);
+		sendData(m_scmLastData->SCM_MoveSpeed, pd.SCM_MoveSpeed, 30002, 0, 99999);
 	}
 
-	if (abs(m_scmLastData->SCM_FrontArmor_Location - pd->SCM_FrontArmor_Location) > fSCMThreshold)
+	if (abs(m_scmLastData->SCM_FrontArmor_Location - pd.SCM_FrontArmor_Location) > fSCMThreshold)
 	{
-		sendData(m_scmLastData->SCM_FrontArmor_Location, pd->SCM_FrontArmor_Location, 30101, 0, 700);
+		sendData(m_scmLastData->SCM_FrontArmor_Location, pd.SCM_FrontArmor_Location, 30101, 0, 700);
 	}
 
-	if (abs(m_scmLastData->SCM_RearArmor_Location - pd->SCM_RearArmor_Location) > fSCMThreshold)
+	if (abs(m_scmLastData->SCM_RearArmor_Location - pd.SCM_RearArmor_Location) > fSCMThreshold)
 	{
-		sendData(m_scmLastData->SCM_RearArmor_Location, pd->SCM_RearArmor_Location, 30102, 0, 20000);
+		sendData(m_scmLastData->SCM_RearArmor_Location, pd.SCM_RearArmor_Location, 30102, 0, 20000);
 	}
 
-	if (abs(m_scmLastData->SCM_CoalLoadBaseBoard_Location - pd->SCM_CoalLoadBaseBoard_Location) > fSCMThreshold)
+	if (abs(m_scmLastData->SCM_CoalLoadBaseBoard_Location - pd.SCM_CoalLoadBaseBoard_Location) > fSCMThreshold)
 	{
-		sendData(m_scmLastData->SCM_CoalLoadBaseBoard_Location, pd->SCM_CoalLoadBaseBoard_Location, 30103, 0, 20000);
+		sendData(m_scmLastData->SCM_CoalLoadBaseBoard_Location, pd.SCM_CoalLoadBaseBoard_Location, 30103, 0, 20000);
 	}
 
-	if (abs(m_scmLastData->SCM_RearArmorLock_Location - pd->SCM_RearArmorLock_Location) > fSCMThreshold)
+	if (abs(m_scmLastData->SCM_RearArmorLock_Location - pd.SCM_RearArmorLock_Location) > fSCMThreshold)
 	{
-		sendData(m_scmLastData->SCM_RearArmorLock_Location, pd->SCM_RearArmorLock_Location, 30104, 0, 155);
+		sendData(m_scmLastData->SCM_RearArmorLock_Location, pd.SCM_RearArmorLock_Location, 30104, 0, 155);
 	}             	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 
- 	if ( abs(m_scmLastData->SCM_PackFrame_Location - pd->SCM_PackFrame_Location) > fSCMThreshold)
+ 	if ( abs(m_scmLastData->SCM_PackFrame_Location - pd.SCM_PackFrame_Location) > fSCMThreshold)
 	{
-		sendData(m_scmLastData->SCM_PackFrame_Location, pd->SCM_PackFrame_Location, 30201, 0, 150);
+		sendData(m_scmLastData->SCM_PackFrame_Location, pd.SCM_PackFrame_Location, 30201, 0, 150);
 	}
 
-	if (abs(m_scmLastData->SCM_CoalPressMachine_Location - pd->SCM_CoalPressMachine_Location) > fSCMThreshold)
+	if (abs(m_scmLastData->SCM_CoalPressMachine_Location - pd.SCM_CoalPressMachine_Location) > fSCMThreshold)
 	{
-		sendData(m_scmLastData->SCM_CoalPressMachine_Location, pd->SCM_CoalPressMachine_Location, 30301, 0, 18000);
+		sendData(m_scmLastData->SCM_CoalPressMachine_Location, pd.SCM_CoalPressMachine_Location, 30301, 0, 18000);
 	}
 
-	if (abs(m_scmLastData->SCM_CoalWall_Location - pd->SCM_CoalWall_Location) > fSCMThreshold)
+	if (abs(m_scmLastData->SCM_CoalWall_Location - pd.SCM_CoalWall_Location) > fSCMThreshold)
 	{
-		sendData(m_scmLastData->SCM_CoalWall_Location, pd->SCM_CoalWall_Location, 30401, 0, 500);
+		sendData(m_scmLastData->SCM_CoalWall_Location, pd.SCM_CoalWall_Location, 30401, 0, 500);
 	}
 	if (fSCMThreshold < 0)
 	{
@@ -404,62 +388,57 @@ void JHStateSync::comparisonData(SCMStateData* pd)
 	}
 }
 
-void JHStateSync::comparisonData(CGTCStateData* pd)
+void JHStateSync::comparisonData(CGTCStateData pd)
 {
-	if (pd == nullptr)
+	if (abs(m_cgtcLastData->CGTC_Location - pd.CGTC_Location) > fCGTCThreshold || abs(m_cgtcLastData->CGTC_MoveSpeed - pd.CGTC_MoveSpeed) > fCGTCThreshold)
 	{
-		cout << "StateData is null" << endl;
-		return;
-	}
-	if (abs(m_cgtcLastData->CGTC_Location - pd->CGTC_Location) > fCGTCThreshold || abs(m_cgtcLastData->CGTC_MoveSpeed - pd->CGTC_MoveSpeed) > fCGTCThreshold)
-	{
-		sendData(m_cgtcLastData->CGTC_Location, pd->CGTC_Location, 40001, 0, 107000);
-		sendData(m_cgtcLastData->CGTC_MoveSpeed, pd->CGTC_MoveSpeed, 40002, 0, 99999);
+		sendData(m_cgtcLastData->CGTC_Location, pd.CGTC_Location, 40001, 0, 107000);
+		sendData(m_cgtcLastData->CGTC_MoveSpeed, pd.CGTC_MoveSpeed, 40002, 0, 99999);
 	}
 
-	if (abs(m_cgtcLastData->CGTC_OvenHeadSmoke_Location - pd->CGTC_OvenHeadSmoke_Location) > fCGTCThreshold)
+	if (abs(m_cgtcLastData->CGTC_OvenHeadSmoke_Location - pd.CGTC_OvenHeadSmoke_Location) > fCGTCThreshold)
 	{
-		sendData(m_cgtcLastData->CGTC_OvenHeadSmoke_Location, pd->CGTC_OvenHeadSmoke_Location, 40101, 0, 1055);
+		sendData(m_cgtcLastData->CGTC_OvenHeadSmoke_Location, pd.CGTC_OvenHeadSmoke_Location, 40101, 0, 1055);
 	}
 
-	if (abs(m_cgtcLastData->CGTC_NO1MGuideSleeve_Location - pd->CGTC_NO1MGuideSleeve_Location) > fCGTCThreshold)
+	if (abs(m_cgtcLastData->CGTC_NO1MGuideSleeve_Location - pd.CGTC_NO1MGuideSleeve_Location) > fCGTCThreshold)
 	{
-		sendData(m_cgtcLastData->CGTC_NO1MGuideSleeve_Location, pd->CGTC_NO1MGuideSleeve_Location, 40201, 0, 675);
+		sendData(m_cgtcLastData->CGTC_NO1MGuideSleeve_Location, pd.CGTC_NO1MGuideSleeve_Location, 40201, 0, 675);
 	}
 
-	if (abs(m_cgtcLastData->CGTC_NO2MGuideSleeve_Location - pd->CGTC_NO2MGuideSleeve_Location) > fCGTCThreshold)
+	if (abs(m_cgtcLastData->CGTC_NO2MGuideSleeve_Location - pd.CGTC_NO2MGuideSleeve_Location) > fCGTCThreshold)
 	{
-		sendData(m_cgtcLastData->CGTC_NO2MGuideSleeve_Location, pd->CGTC_NO2MGuideSleeve_Location, 40202, 0, 675);
+		sendData(m_cgtcLastData->CGTC_NO2MGuideSleeve_Location, pd.CGTC_NO2MGuideSleeve_Location, 40202, 0, 675);
 	}	
 
-	if (abs(m_cgtcLastData->CGTC_NO1LidTakeOff_Location - pd->CGTC_NO1LidTakeOff_Location) > fCGTCThreshold)
+	if (abs(m_cgtcLastData->CGTC_NO1LidTakeOff_Location - pd.CGTC_NO1LidTakeOff_Location) > fCGTCThreshold)
 	{
-		sendData(m_cgtcLastData->CGTC_NO1LidTakeOff_Location, pd->CGTC_NO1LidTakeOff_Location, 40301, 0, 1300);
+		sendData(m_cgtcLastData->CGTC_NO1LidTakeOff_Location, pd.CGTC_NO1LidTakeOff_Location, 40301, 0, 1300);
 	}
 
-	if (abs(m_cgtcLastData->CGTC_NO2LidTakeOff_Location - pd->CGTC_NO2LidTakeOff_Location) > fCGTCThreshold)
+	if (abs(m_cgtcLastData->CGTC_NO2LidTakeOff_Location - pd.CGTC_NO2LidTakeOff_Location) > fCGTCThreshold)
 	{
-		sendData(m_cgtcLastData->CGTC_NO2LidTakeOff_Location, pd->CGTC_NO2LidTakeOff_Location, 40302, 0, 1300);
+		sendData(m_cgtcLastData->CGTC_NO2LidTakeOff_Location, pd.CGTC_NO2LidTakeOff_Location, 40302, 0, 1300);
 	}
 
-	if (abs(m_cgtcLastData->CGTC_NO3LidTakeOff_Location - pd->CGTC_NO3LidTakeOff_Location) > fCGTCThreshold)
+	if (abs(m_cgtcLastData->CGTC_NO3LidTakeOff_Location - pd.CGTC_NO3LidTakeOff_Location) > fCGTCThreshold)
 	{
-		sendData(m_cgtcLastData->CGTC_NO3LidTakeOff_Location, pd->CGTC_NO3LidTakeOff_Location, 40303, 0, 1300);
+		sendData(m_cgtcLastData->CGTC_NO3LidTakeOff_Location, pd.CGTC_NO3LidTakeOff_Location, 40303, 0, 1300);
 	}
 
-	if (abs(m_cgtcLastData->CGTC_NO4LidTakeOff_Location - pd->CGTC_NO4LidTakeOff_Location) > fCGTCThreshold)
+	if (abs(m_cgtcLastData->CGTC_NO4LidTakeOff_Location - pd.CGTC_NO4LidTakeOff_Location) > fCGTCThreshold)
 	{
-		sendData(m_cgtcLastData->CGTC_NO4LidTakeOff_Location, pd->CGTC_NO4LidTakeOff_Location, 40304, 0, 1300);
+		sendData(m_cgtcLastData->CGTC_NO4LidTakeOff_Location, pd.CGTC_NO4LidTakeOff_Location, 40304, 0, 1300);
 	}
 
-	if (abs(m_cgtcLastData->CGTC_NO5LidTakeOff_Location - pd->CGTC_NO5LidTakeOff_Location) > fCGTCThreshold)
+	if (abs(m_cgtcLastData->CGTC_NO5LidTakeOff_Location - pd.CGTC_NO5LidTakeOff_Location) > fCGTCThreshold)
 	{
-		sendData(m_cgtcLastData->CGTC_NO5LidTakeOff_Location, pd->CGTC_NO5LidTakeOff_Location, 40305, 0, 1300);
+		sendData(m_cgtcLastData->CGTC_NO5LidTakeOff_Location, pd.CGTC_NO5LidTakeOff_Location, 40305, 0, 1300);
 	}
 
-	if (abs(m_cgtcLastData->CGTC_NO6LidTakeOff_Location - pd->CGTC_NO6LidTakeOff_Location) > fCGTCThreshold)
+	if (abs(m_cgtcLastData->CGTC_NO6LidTakeOff_Location - pd.CGTC_NO6LidTakeOff_Location) > fCGTCThreshold)
 	{
-		sendData(m_cgtcLastData->CGTC_NO6LidTakeOff_Location, pd->CGTC_NO6LidTakeOff_Location, 40306, 0, 1300);
+		sendData(m_cgtcLastData->CGTC_NO6LidTakeOff_Location, pd.CGTC_NO6LidTakeOff_Location, 40306, 0, 1300);
 	}	
 	if (fCGTCThreshold < 0)
 	{
@@ -468,27 +447,22 @@ void JHStateSync::comparisonData(CGTCStateData* pd)
 	}
 }
 
-void JHStateSync::comparisonData(HCBCStateData* pd)
+void JHStateSync::comparisonData(HCBCStateData pd)
 {
-	if (pd == nullptr)
+	if (abs(m_hcbcLastData->HCBC_Location - pd.HCBC_Location) > fHCBCThreshold || abs(m_hcbcLastData->HCBC_MoveSpeed - pd.HCBC_MoveSpeed) > fHCBCThreshold)
 	{
-		cout << "StateData is null" << endl;
-		return;
-	}
-	if (abs(m_hcbcLastData->HCBC_Location - pd->HCBC_Location) > fHCBCThreshold || abs(m_hcbcLastData->HCBC_MoveSpeed - pd->HCBC_MoveSpeed) > fHCBCThreshold)
-	{
-		sendData(m_hcbcLastData->HCBC_Location, pd->HCBC_Location, 50001, 0, 369100);
-		sendData(m_hcbcLastData->HCBC_MoveSpeed, pd->HCBC_MoveSpeed, 50002, 0, 99999);
+		sendData(m_hcbcLastData->HCBC_Location, pd.HCBC_Location, 50001, 0, 369100);
+		sendData(m_hcbcLastData->HCBC_MoveSpeed, pd.HCBC_MoveSpeed, 50002, 0, 99999);
 	}
 
-	if (abs(m_hcbcLastData->HCBC_OutsideFlipBoard_Location - pd->HCBC_OutsideFlipBoard_Location) > fHCBCThreshold)
+	if (abs(m_hcbcLastData->HCBC_OutsideFlipBoard_Location - pd.HCBC_OutsideFlipBoard_Location) > fHCBCThreshold)
 	{
-		sendData(m_hcbcLastData->HCBC_OutsideFlipBoard_Location, pd->HCBC_OutsideFlipBoard_Location, 50003, 0, 1000);
+		sendData(m_hcbcLastData->HCBC_OutsideFlipBoard_Location, pd.HCBC_OutsideFlipBoard_Location, 50003, 0, 1000);
 	}
 
-	if (abs(m_hcbcLastData->HCBC_InsideFlipBoard_Location - pd->HCBC_InsideFlipBoard_Location) > fHCBCThreshold)
+	if (abs(m_hcbcLastData->HCBC_InsideFlipBoard_Location - pd.HCBC_InsideFlipBoard_Location) > fHCBCThreshold)
 	{
-		sendData(m_hcbcLastData->HCBC_InsideFlipBoard_Location, pd->HCBC_InsideFlipBoard_Location, 50004, 0, 350);
+		sendData(m_hcbcLastData->HCBC_InsideFlipBoard_Location, pd.HCBC_InsideFlipBoard_Location, 50004, 0, 350);
 	}
 	if (fHCBCThreshold < 0)
 	{

@@ -413,7 +413,7 @@ public:
 	//void recvData(int& state, const char* strNodeId);
 
 	//// 接收float类型数据
-	//void recvData(float* state, const char* strNodeId);
+	//void recvData(float& state, const char* strNodeId);
 
 	template <typename T>
 	void recvData(T& state, const char* strNodeId);

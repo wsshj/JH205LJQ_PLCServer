@@ -118,7 +118,7 @@ public:
 	void operator()();
 
 	template <typename T>
-	T* recvData(const char* strNodeId);
+	T recvData(const char* strNodeId);
 
 	bool recvBoolData(const char * strNodeId);
 
@@ -129,14 +129,14 @@ public:
 
 	void sendData(bool& lastValue, bool newValue, INT32 key);
 
-	void comparisonData(CTCStateData* pd);
+	void comparisonData(CTCStateData pd);
 
-	void comparisonData(CPMStateData* pd);
+	void comparisonData(CPMStateData pd);
 
-	void comparisonData(SCMStateData* pd);
+	void comparisonData(SCMStateData pd);
 
-	void comparisonData(CGTCStateData* pd);
+	void comparisonData(CGTCStateData pd);
 
-	void comparisonData(HCBCStateData* pd);
+	void comparisonData(HCBCStateData pd);
 };
 

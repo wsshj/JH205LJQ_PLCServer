@@ -513,7 +513,7 @@ CTCTopUI JHUIDataSync::packCTCTopUI()
 	CTCTopUI ui;
 	
 	recvData(ui.furnaceId, "\"DB200  HMI\".\"Sys-CurrentStove\"");
-	recvData(ui.position, "\"VirtualHCBC1ToUE\".\"CTC_Location\"");
+	recvData(ui.position, "\"VirtualCTC1ToUE\".\"CTC_Location\"");
 	recvData(ui.temperature, "\"DB101  SystemStatus\".\"OilTemperature\"");
 	recvData(ui.compressor, "");
 
@@ -944,7 +944,7 @@ CTCDeviceStatusUI JHUIDataSync::packCTCDeviceStatusUI()
 //	UA_Variant_clear(&value);
 //}
 //
-//void JHUIDataSync::recvData(float* state, const char* strNodeId)
+//void JHUIDataSync::recvData(float& state, const char* strNodeId)
 //{
 //	UA_NodeId nodeId = UA_NODEID_STRING(3, const_cast<char*>(strNodeId));
 //
@@ -957,7 +957,7 @@ CTCDeviceStatusUI JHUIDataSync::packCTCDeviceStatusUI()
 //	// 判断接收状态和数据类型是否符合
 //	if (retval == UA_STATUSCODE_GOOD && UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_FLOAT]))
 //	{
-//		*state = *(float*)value.data;
+//		state = *(float*)value.data;
 //	}
 //	UA_Variant_clear(&value);
 //}
@@ -977,6 +977,11 @@ void JHUIDataSync::recvData(T& state, const char* strNodeId)
 	if (retval == UA_STATUSCODE_GOOD)
 	{
 		state = *(T*)value.data;
+
+		if (UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_INT16]))
+		{
+			state = *(short*)value.data;
+		}
 	}
 	UA_Variant_clear(&value);
 }
