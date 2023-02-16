@@ -38,6 +38,12 @@ JHStateSync::~JHStateSync()
 	delete m_scmLastData;
 	delete m_cgtcLastData;
 	delete m_hcbcLastData;
+
+	m_ctcLastData = nullptr;
+	m_cpmLastData = nullptr;
+	m_scmLastData = nullptr;
+	m_cgtcLastData = nullptr;
+	m_hcbcLastData = nullptr;
 }
 
 void JHStateSync::operator()()

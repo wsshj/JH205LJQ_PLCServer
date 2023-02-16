@@ -26,9 +26,6 @@ int main()
 
     ConfigFile cfg("config.cfg");
 
-    //string str = readConfig("config.txt");
-    //const char* recvHost = str.c_str();
-
     string strRecv = cfg.getvalue<string>("recv_host");
     const char* recvHost = strRecv.c_str();
 

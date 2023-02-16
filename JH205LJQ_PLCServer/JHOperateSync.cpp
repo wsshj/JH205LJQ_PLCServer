@@ -136,16 +136,16 @@ void JHOperateSync::startOperateSync()
 
 	if (bind(m_recvFromUE->svr, (LPSOCKADDR)&m_recvFromUE->sin, sizeof(m_recvFromUE->sin)) == SOCKET_ERROR)
 	{
-		printf("bind error !");
+		cout << "\nbind error !\n" << endl;
 	}
 
 	while (true)
 	{
-		int ret_len = recvfrom(m_recvFromUE->svr, revData, 2048, 0, (SOCKADDR*)&remoteAddr, &nAddrlen);
+		int ret_len = recvfrom(m_recvFromUE->svr, revData, 1024, 0, (SOCKADDR*)&remoteAddr, &nAddrlen);
 
 		if (SOCKET_ERROR == ret_len)
 		{
-			printf("recvfrom error !/n");
+			cout << "\nrecvfrom error !\n" << endl;
 			Sleep(3000);
 			break;
 		}
