@@ -127,7 +127,7 @@ public:
 
 	void sendData(float& lastValue, float newValue, INT32 key, float min, float max);
 
-	void sendData(bool& lastValue, bool newValue, INT32 key);
+	//void sendData(bool& lastValue, bool newValue, INT32 key);
 
 	void comparisonData(CTCStateData pd);
 

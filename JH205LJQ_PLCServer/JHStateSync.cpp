@@ -99,7 +99,7 @@ bool JHStateSync::recvBoolData(const char* strNodeId)
 		return data;
 	}
 	UA_Variant_clear(&value);
-	return 0;
+	return false;
 }
 
 void JHStateSync::startStateSync()
@@ -162,30 +162,28 @@ void JHStateSync::sendData(float& lastValue, float newValue, INT32 key, float mi
 	lastValue = newValue;
 }
 
-void JHStateSync::sendData(bool& lastValue, bool newValue, INT32 key)
-{
-	StateSyncProtocol data;
-
-	data.key = key;
-	data.state = newValue;
-
-	int send_len = sendto(m_sendToUE->svr, (char*)&data, sizeof(data), 0, (const SOCKADDR*)&m_sendToUE->sin, sizeof(m_sendToUE->sin));
-	if (SOCKET_ERROR == send_len)
-	{
-		cout << "sendto error !" << endl;
-	}
-
-	lastValue = newValue;
-}
+//void JHStateSync::sendData(bool& lastValue, bool newValue, INT32 key)
+//{
+//	StateSyncProtocol data;
+//
+//	data.key = key;
+//	data.state = newValue;
+//
+//	int send_len = sendto(m_sendToUE->svr, (char*)&data, sizeof(data), 0, (const SOCKADDR*)&m_sendToUE->sin, sizeof(m_sendToUE->sin));
+//	if (SOCKET_ERROR == send_len)
+//	{
+//		cout << "sendto error !" << endl;
+//	}
+//
+//	lastValue = newValue;
+//}
 
 void JHStateSync::comparisonData(CTCStateData pd)
 { 
-	if (abs(m_ctcLastData->CTC_Location - pd.CTC_Location) > fCTCThreshold || abs(m_ctcLastData->CTC_MoveSpeed - pd.CTC_MoveSpeed) > fCTCThreshold)
+	if (abs(m_ctcLastData->CTC_Location - pd.CTC_Location) > fCTCThreshold)
 	{
 		sendData(m_ctcLastData->CTC_Location, pd.CTC_Location, 10001, 0, 152000);
-		sendData(m_ctcLastData->CTC_MoveSpeed, pd.CTC_MoveSpeed, 10002, 0, 99999);
 		//cout << "Location:" << pd.CTC_Location << endl;
-		//cout << "CTC_MoveSpeed:" << pd.CTC_MoveSpeed << endl;
 	}
 
 	/*if (abs(m_ctcLastData->CTC_MoveSpeed - pd.CTC_MoveSpeed) > fCTCThreshold)
@@ -258,6 +256,7 @@ void JHStateSync::comparisonData(CTCStateData pd)
 	{
 		sendData(m_ctcLastData->CTC_CokeGrid_Location, pd.CTC_CokeGrid_Location, 10501, 0, 2950);
 	}
+
 	if (fCTCThreshold < 0)
 	{	
 		cout << "CTC_Threshold:" << fCTCThreshold << endl;
@@ -267,10 +266,9 @@ void JHStateSync::comparisonData(CTCStateData pd)
 
 void JHStateSync::comparisonData(CPMStateData pd)
 {
-	if (abs(m_cpmLastData->CPM_Location - pd.CPM_Location) > fCPMThreshold || abs(m_cpmLastData->CPM_MoveSpeed - pd.CPM_MoveSpeed) > fCPMThreshold)
+	if (abs(m_cpmLastData->CPM_Location - pd.CPM_Location) > fCPMThreshold)
 	{
 		sendData(m_cpmLastData->CPM_Location, pd.CPM_Location, 20001, 0, 152000);
-		sendData(m_cpmLastData->CPM_MoveSpeed, pd.CPM_MoveSpeed, 20002, 0, 99999);
 	}
 
 	if (abs(m_cpmLastData->CPM_GetDoorTrolly_Location - pd.CPM_GetDoorTrolly_Location) > fCPMThreshold)
@@ -332,6 +330,7 @@ void JHStateSync::comparisonData(CPMStateData pd)
 	{
 		sendData(m_cpmLastData->CPM_CoalClearMachine_Location, pd.CPM_CoalClearMachine_Location, 20501, 0, 1500);
 	}
+
 	if (fCPMThreshold < 0)
 	{
 		cout << "CPM_Threshold:" << fCPMThreshold << endl;
@@ -341,10 +340,9 @@ void JHStateSync::comparisonData(CPMStateData pd)
 
 void JHStateSync::comparisonData(SCMStateData pd)
 {
-	if (abs(m_scmLastData->SCM_Location - pd.SCM_Location) > fSCMThreshold || abs(m_scmLastData->SCM_MoveSpeed - pd.SCM_MoveSpeed) > fSCMThreshold)
+	if (abs(m_scmLastData->SCM_Location - pd.SCM_Location) > fSCMThreshold)
 	{
 		sendData(m_scmLastData->SCM_Location, pd.SCM_Location, 30001, 0, 180100);
-		sendData(m_scmLastData->SCM_MoveSpeed, pd.SCM_MoveSpeed, 30002, 0, 99999);
 	}
 
 	if (abs(m_scmLastData->SCM_FrontArmor_Location - pd.SCM_FrontArmor_Location) > fSCMThreshold)
@@ -354,12 +352,12 @@ void JHStateSync::comparisonData(SCMStateData pd)
 
 	if (abs(m_scmLastData->SCM_RearArmor_Location - pd.SCM_RearArmor_Location) > fSCMThreshold)
 	{
-		sendData(m_scmLastData->SCM_RearArmor_Location, pd.SCM_RearArmor_Location, 30102, 0, 20000);
+		sendData(m_scmLastData->SCM_RearArmor_Location, pd.SCM_RearArmor_Location, 30102, 0, 21000);
 	}
 
 	if (abs(m_scmLastData->SCM_CoalLoadBaseBoard_Location - pd.SCM_CoalLoadBaseBoard_Location) > fSCMThreshold)
 	{
-		sendData(m_scmLastData->SCM_CoalLoadBaseBoard_Location, pd.SCM_CoalLoadBaseBoard_Location, 30103, 0, 20000);
+		sendData(m_scmLastData->SCM_CoalLoadBaseBoard_Location, pd.SCM_CoalLoadBaseBoard_Location, 30103, 0, 21000);
 	}
 
 	if (abs(m_scmLastData->SCM_RearArmorLock_Location - pd.SCM_RearArmorLock_Location) > fSCMThreshold)
@@ -381,6 +379,7 @@ void JHStateSync::comparisonData(SCMStateData pd)
 	{
 		sendData(m_scmLastData->SCM_CoalWall_Location, pd.SCM_CoalWall_Location, 30401, 0, 500);
 	}
+
 	if (fSCMThreshold < 0)
 	{
 		cout << "SCM_Threshold:" << fSCMThreshold << endl;
@@ -390,10 +389,9 @@ void JHStateSync::comparisonData(SCMStateData pd)
 
 void JHStateSync::comparisonData(CGTCStateData pd)
 {
-	if (abs(m_cgtcLastData->CGTC_Location - pd.CGTC_Location) > fCGTCThreshold || abs(m_cgtcLastData->CGTC_MoveSpeed - pd.CGTC_MoveSpeed) > fCGTCThreshold)
+	if (abs(m_cgtcLastData->CGTC_Location - pd.CGTC_Location) > fCGTCThreshold)
 	{
 		sendData(m_cgtcLastData->CGTC_Location, pd.CGTC_Location, 40001, 0, 107000);
-		sendData(m_cgtcLastData->CGTC_MoveSpeed, pd.CGTC_MoveSpeed, 40002, 0, 99999);
 	}
 
 	if (abs(m_cgtcLastData->CGTC_OvenHeadSmoke_Location - pd.CGTC_OvenHeadSmoke_Location) > fCGTCThreshold)
@@ -440,6 +438,7 @@ void JHStateSync::comparisonData(CGTCStateData pd)
 	{
 		sendData(m_cgtcLastData->CGTC_NO6LidTakeOff_Location, pd.CGTC_NO6LidTakeOff_Location, 40306, 0, 1300);
 	}	
+
 	if (fCGTCThreshold < 0)
 	{
 		cout << "CGTC_Threshold:" << fCGTCThreshold << endl;
@@ -449,10 +448,9 @@ void JHStateSync::comparisonData(CGTCStateData pd)
 
 void JHStateSync::comparisonData(HCBCStateData pd)
 {
-	if (abs(m_hcbcLastData->HCBC_Location - pd.HCBC_Location) > fHCBCThreshold || abs(m_hcbcLastData->HCBC_MoveSpeed - pd.HCBC_MoveSpeed) > fHCBCThreshold)
+	if (abs(m_hcbcLastData->HCBC_Location - pd.HCBC_Location) > fHCBCThreshold)
 	{
 		sendData(m_hcbcLastData->HCBC_Location, pd.HCBC_Location, 50001, 0, 369100);
-		sendData(m_hcbcLastData->HCBC_MoveSpeed, pd.HCBC_MoveSpeed, 50002, 0, 99999);
 	}
 
 	if (abs(m_hcbcLastData->HCBC_OutsideFlipBoard_Location - pd.HCBC_OutsideFlipBoard_Location) > fHCBCThreshold)
@@ -464,6 +462,7 @@ void JHStateSync::comparisonData(HCBCStateData pd)
 	{
 		sendData(m_hcbcLastData->HCBC_InsideFlipBoard_Location, pd.HCBC_InsideFlipBoard_Location, 50004, 0, 350);
 	}
+
 	if (fHCBCThreshold < 0)
 	{
 		cout << "HCBC_Threshold:" << fHCBCThreshold << endl;
