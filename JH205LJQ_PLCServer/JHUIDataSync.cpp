@@ -2,11 +2,10 @@
 
 JHUIDataSync::JHUIDataSync()
 {
-	m_sendToUE = nullptr;
 	m_recvFromPLC = nullptr;
 }
 
-JHUIDataSync::JHUIDataSync(UA_Client* recvFromPLC, SocketUDP* sendToUE, int vehicleType)
+JHUIDataSync::JHUIDataSync(UA_Client* recvFromPLC, vector<SocketUDP*> sendToUE, int vehicleType)
 {
 	m_sendToUE = sendToUE;
 	m_recvFromPLC = recvFromPLC;
@@ -994,11 +993,14 @@ void JHUIDataSync::sendData(T t, int key)
 	data.size = sizeof(t);
 	memcpy(data.value, &t, sizeof(t));
 
-	int send_len = sendto(m_sendToUE->svr, (char*)&data, sizeof(data), 0, (const SOCKADDR*)&m_sendToUE->sin, sizeof(m_sendToUE->sin));
-
-	if (SOCKET_ERROR == send_len)
+	for (auto sendToUE = m_sendToUE.begin(); sendToUE < m_sendToUE.end(); sendToUE++)
 	{
-		cout << "DeviceStatus sendto error !" << endl;
+		int send_len = sendto((*sendToUE)->svr, (char*)&data, sizeof(data), 0, (const SOCKADDR*)&(*sendToUE)->sin, sizeof((*sendToUE)->sin));
+
+		if (SOCKET_ERROR == send_len)
+		{
+			cout << "UIData sendto error !" << endl;
+		}
 	}
 }
 

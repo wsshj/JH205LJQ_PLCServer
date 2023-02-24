@@ -14,11 +14,10 @@ JHStateSync::JHStateSync()
 	m_cgtcLastData = new CGTCStateData();
 	m_hcbcLastData = new HCBCStateData();
 
-	m_sendToUE = nullptr;
 	m_recvFromPLC = nullptr;
 }
 
-JHStateSync::JHStateSync(UA_Client* recvFromPLC, SocketUDP* sendToUE, int vehicleType)
+JHStateSync::JHStateSync(UA_Client* recvFromPLC, vector<SocketUDP*> sendToUE, int vehicleType)
 {
 	m_ctcLastData = new CTCStateData();
 	m_cpmLastData = new CPMStateData();
@@ -159,10 +158,14 @@ void JHStateSync::sendData(float& lastValue, float newValue, INT32 key, float mi
 		data.signal = 2;
 	}
 
-	int send_len = sendto(m_sendToUE->svr, (char*)&data, sizeof(data), 0, (const SOCKADDR*)&m_sendToUE->sin, sizeof(m_sendToUE->sin));
-	if (SOCKET_ERROR == send_len)
+	for (auto sendToUE = m_sendToUE.begin(); sendToUE < m_sendToUE.end(); sendToUE++)
 	{
-		cout << "sendto error !" << endl;
+		int send_len = sendto((*sendToUE)->svr, (char*)&data, sizeof(data), 0, (const SOCKADDR*)&(*sendToUE)->sin, sizeof((*sendToUE)->sin));
+
+		if (SOCKET_ERROR == send_len)
+		{
+			cout << "state sendto error !" << endl;
+		}
 	}
 
 	lastValue = newValue;
@@ -189,7 +192,7 @@ void JHStateSync::comparisonData(CTCStateData pd)
 	if (abs(m_ctcLastData->CTC_Location - pd.CTC_Location) > fCTCThreshold)
 	{
 		sendData(m_ctcLastData->CTC_Location, pd.CTC_Location, 10001, 0, 152000);
-		//cout << "Location:" << pd.CTC_Location << endl;
+		cout << "Location:" << pd.CTC_Location << endl;
 	}
 
 	/*if (abs(m_ctcLastData->CTC_MoveSpeed - pd.CTC_MoveSpeed) > fCTCThreshold)
@@ -349,6 +352,7 @@ void JHStateSync::comparisonData(SCMStateData pd)
 	if (abs(m_scmLastData->SCM_Location - pd.SCM_Location) > fSCMThreshold)
 	{
 		sendData(m_scmLastData->SCM_Location, pd.SCM_Location, 30001, 0, 180100);
+		//cout << "SCM Location:" << pd.SCM_Location << endl;
 	}
 
 	if (abs(m_scmLastData->SCM_FrontArmor_Location - pd.SCM_FrontArmor_Location) > fSCMThreshold)

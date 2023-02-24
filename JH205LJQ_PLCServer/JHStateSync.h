@@ -103,7 +103,7 @@ private:
 	CGTCStateData* m_cgtcLastData;
 	HCBCStateData* m_hcbcLastData;
 
-	SocketUDP* m_sendToUE;
+	vector<SocketUDP*> m_sendToUE;
 	UA_Client* m_recvFromPLC;
 
 	int m_vehicleType;
@@ -111,7 +111,7 @@ private:
 public:
 	JHStateSync();
 
-	JHStateSync(UA_Client* recvFromPLC, SocketUDP* sendToUE, int vehicleType);
+	JHStateSync(UA_Client* recvFromPLC, vector<SocketUDP*> sendToUE, int vehicleType);
 
 	~JHStateSync();
 

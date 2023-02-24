@@ -300,7 +300,7 @@ private:
 	const int m_nSyncFrequency = 1000;
 
 public:
-	SocketUDP* m_sendToUE;
+	vector<SocketUDP*> m_sendToUE;
 	UA_Client* m_recvFromPLC;
 	int m_vehicleType;
 	UINT8 m_nCTCStates;
@@ -308,7 +308,7 @@ public:
 public:
 	JHUIDataSync();
 
-	JHUIDataSync(UA_Client* recvFromPLC, SocketUDP* sendToUE, int vehicleType);
+	JHUIDataSync(UA_Client* recvFromPLC, vector<SocketUDP*> sendToUE, int vehicleType);
 
 	void operator()();
 

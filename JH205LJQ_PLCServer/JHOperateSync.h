@@ -28,7 +28,7 @@ private:
 public:
 	JHOperateSync();
 
-	JHOperateSync(SocketUDP* recvFromUE, int vehicleType);
+	JHOperateSync(SocketUDP* recvFromUE);
 
 	void operator()();
 

@@ -11,10 +11,9 @@ JHOperateSync::JHOperateSync()
 	m_recvFromUE = nullptr;
 }
 
-JHOperateSync::JHOperateSync(SocketUDP* recvFromUE, int vehicleType)
+JHOperateSync::JHOperateSync(SocketUDP* recvFromUE)
 {
 	m_recvFromUE = recvFromUE;
-	m_vehicleType = vehicleType;
 	m_host = "";
 }
 
@@ -25,56 +24,60 @@ void JHOperateSync::operator()()
 
 void JHOperateSync::sendData(UA_Boolean value, UA_NodeId nodeId)
 {
-	JHNetwork np;
+	UA_Client* client = UA_Client_new();
 
-	UA_Client* recvCTCFromPLC = np.connectOPCUA(m_host);
+	UA_ClientConfig_setDefault(UA_Client_getConfig(client));
 
-	if (recvCTCFromPLC == nullptr)
+	UA_StatusCode retval = UA_Client_connect(client, m_host);
+
+	if (retval != UA_STATUSCODE_GOOD)
 	{
-		cout << "Error:By PLCUA connect CTC From PLC failed." << endl;
-		return;
+		UA_Client_delete(client);
+		cout << "Connect OPCUA is failed, Error code:" << (int)retval << endl;
 	}
 
 	UA_Variant* myVariant = UA_Variant_new();
 
 	UA_Variant_setScalarCopy(myVariant, &value, &UA_TYPES[UA_TYPES_BOOLEAN]);
 
-	int retval = UA_Client_writeValueAttribute(recvCTCFromPLC, nodeId, myVariant);
+	retval = UA_Client_writeValueAttribute(client, nodeId, myVariant);
 
 	if (retval != UA_STATUSCODE_GOOD)
 	{
-		cout << retval << endl;
+		cout << (int)retval << endl;
 	}
 
 	UA_Variant_delete(myVariant);
-	UA_Client_delete(recvCTCFromPLC);
+	UA_Client_delete(client);
 }
 
 void JHOperateSync::sendData(UA_Int16 value, UA_NodeId nodeId)
 {
-	JHNetwork np;
+	UA_Client* client = UA_Client_new();
 
-	UA_Client* recvCTCFromPLC = np.connectOPCUA(m_host);
+	UA_ClientConfig_setDefault(UA_Client_getConfig(client));
 
-	if (recvCTCFromPLC == nullptr)
+	UA_StatusCode retval = UA_Client_connect(client, m_host);
+
+	if (retval != UA_STATUSCODE_GOOD)
 	{
-		cout << "Error:By PLCUA connect CTC From PLC failed." << endl;
-		return;
+		UA_Client_delete(client);
+		cout << "Connect OPCUA is failed, Error code:" << (int)retval << endl;
 	}
 
 	UA_Variant* myVariant = UA_Variant_new();
 
 	UA_Variant_setScalarCopy(myVariant, &value, &UA_TYPES[UA_TYPES_INT16]);
 
-	int retval = UA_Client_writeValueAttribute(recvCTCFromPLC, nodeId, myVariant);
+	retval = UA_Client_writeValueAttribute(client, nodeId, myVariant);
 
 	if (retval != UA_STATUSCODE_GOOD)
 	{
-		cout << retval << endl;
+		cout << (int)retval << endl;
 	}
 
 	UA_Variant_delete(myVariant);
-	UA_Client_delete(recvCTCFromPLC);
+	UA_Client_delete(client);
 }
 
 void JHOperateSync::comparisonData(UINT8 key, const char* str1)
